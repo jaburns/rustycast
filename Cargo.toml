@@ -10,4 +10,4 @@ name = "rustycast"
 path = "src/main_basic.rs"
 
 [dependencies.sdl]
-path = "/Users/jaburns/sources/rust-sdl"
+path = "lib/rust-sdl"
