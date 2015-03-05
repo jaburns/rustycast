@@ -4,11 +4,20 @@ extern crate rand;
 use self::sdl::video::{SurfaceFlag, VideoFlag};
 use self::sdl::event::{Event};
 
+static WIDTH:  usize = 320;
+static HEIGHT: usize = 240;
+
+fn get_color() -> (u8, u8, u8) {
+    (rand::random::<u8>(),
+     rand::random::<u8>(),
+     rand::random::<u8>())
+}
+
 pub fn real_main() {
     sdl::init(&[sdl::InitFlag::Video]);
     sdl::wm::set_caption("RustyCast", "RustyCast");
 
-    let screen = match sdl::video::set_video_mode(320, 240, 32,
+    let screen = match sdl::video::set_video_mode(WIDTH as isize, HEIGHT as isize, 32,
                                                   &[SurfaceFlag::HWSurface],
                                                   &[VideoFlag::DoubleBuf]) {
         Ok(screen) => screen,
@@ -27,16 +36,13 @@ pub fn real_main() {
         }
 
         screen.with_lock(|pixels| {
-            for x in 0..320 {
-                for y in 0..240 {
-                    let r = rand::random::<u8>();
-                    let g = rand::random::<u8>();
-                    let b = rand::random::<u8>();
-
-                    pixels[4*(320*y+x) + 0] = 0xFF;
-                    pixels[4*(320*y+x) + 1] = r;
-                    pixels[4*(320*y+x) + 2] = g;
-                    pixels[4*(320*y+x) + 3] = b;
+            for x in 0..WIDTH {
+                for y in 0..HEIGHT {
+                    let (r, g, b) = get_color();
+                    pixels[4*(WIDTH*y+x) + 0] = 0xFF;
+                    pixels[4*(WIDTH*y+x) + 1] = r;
+                    pixels[4*(WIDTH*y+x) + 2] = g;
+                    pixels[4*(WIDTH*y+x) + 3] = b;
                 }
             }
             true
