@@ -1,0 +1,13 @@
+[package]
+name = "rustycast"
+version = "0.0.1"
+authors = [
+	"Jeremy Burns <j@jaburns.net>",
+]
+
+[[bin]]
+name = "rustycast"
+path = "main.rs"
+
+[dependencies.sdl]
+path = "/Users/jaburns/sources/rust-sdl"
