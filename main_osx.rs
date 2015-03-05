@@ -2,7 +2,7 @@
 //! Run `cargo build -v`. When it fails to compile main, get the failed command and append
 //! the following to the failed rustc command:
 //!
-//!     -C link-args="-lSDLmain -lSDL -Wl,-framework,Cocoa"
+//!
 //!
 #![no_main]
 

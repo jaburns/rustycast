@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+cp Cargo.toml Cargo.toml.bak
+sed -i '' 's/"main\.rs"/"main_osx.rs"/' Cargo.toml
+rustc_cmd="$(cargo build -v 2>/dev/null | tee /dev/tty | grep main_osx | cut -d\` -f2)"
+$rustc_cmd -C link-args="-lSDLmain -lSDL -Wl,-framework,Cocoa"
+mv Cargo.toml.bak Cargo.toml
+
