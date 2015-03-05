@@ -7,7 +7,7 @@ authors = [
 
 [[bin]]
 name = "rustycast"
-path = "main_basic.rs"
+path = "src/main_basic.rs"
 
 [dependencies.sdl]
 path = "/Users/jaburns/sources/rust-sdl"

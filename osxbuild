@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 cp Cargo.toml Cargo.toml.bak
-sed -i '' 's/"main_basic\.rs"/"main_osx.rs"/' Cargo.toml
+sed -i '' 's/main_basic/main_osx/' Cargo.toml
 
 # Run cargo build. It will fail. Cut out the attempted rustc command. Append our args and run again.
 rustc_cmd="$(cargo build -v 2>/dev/null | tee /dev/tty | grep main_osx | cut -d\` -f2)"
