@@ -1,13 +1,14 @@
 extern crate sdl;
 
-use sdl::video::{SurfaceFlag, VideoFlag};
-use sdl::event::{Event};
+use self::sdl::video::{SurfaceFlag, VideoFlag};
+use self::sdl::event::{Event};
 
 use std::num::Float;
+use std::rand;
 
-fn main() {
+pub fn real_main() {
     sdl::init(&[sdl::InitFlag::Video]);
-    sdl::wm::set_caption("Rust", "Rust");
+    sdl::wm::set_caption("RustyCast", "RustyCast");
 
     let screen = match sdl::video::set_video_mode(320, 240, 32,
                                                   &[SurfaceFlag::HWSurface],
@@ -30,13 +31,13 @@ fn main() {
         screen.with_lock(|pixels| {
             for x in 0..320 {
                 for y in 0..240 {
-                    let fx = x as f32;
-                    let fy = y as f32;
-                    let dist = Float::sqrt(fx*fx + fy*fy) as u8;
+                    //let fx = x as f32;
+                    //let fy = y as f32;
+                    //let dist = Float::sqrt(fx*fx + fy*fy) as u8;
 
-                    let r = dist;
-                    let g = 3*(y as u8)-0xFF-10*t;
-                    let b = 7*t;
+                    let r = rand::random::<u8>();//dist;
+                    let g = rand::random::<u8>();//3*(y as u8)-0xFF-10*t;
+                    let b = rand::random::<u8>();//7*t;
 
                     pixels[4*(320*y+x) + 0] = 0xFF;
                     pixels[4*(320*y+x) + 1] = r;
