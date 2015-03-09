@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 
-cp Cargo.toml Cargo.toml.bak
-sed -i '' 's/main_basic/main_osx/' Cargo.toml
+make_osx_main() {
+    echo '#![no_main]'
+    cat "$1" | while read line; do
+        if [[ "$line" == *"fn main"* ]]; then
+            echo '#[no_mangle]'
+            echo '#[allow(non_snake_case)]'
+            echo 'pub extern "C" fn SDL_main() {'
+        else
+            echo "$line"
+        fi
+    done
+}
+
+cp src/main.rs src/main.rs.bak
+make_osx_main src/main.rs.bak > src/main.rs
 
 # Run cargo build. It will fail. Cut out the attempted rustc command. Append our args and run again.
-rustc_cmd="$(cargo build -v 2>/dev/null | tee /dev/tty | grep main_osx | cut -d\` -f2)"
+rustc_cmd="$(cargo build -v 2>/dev/null | tee /dev/tty | grep 'src\/main\.rs' | cut -d\` -f2)"
 $rustc_cmd -C link-args="-lSDLmain -lSDL -Wl,-framework,Cocoa"
 
-mv Cargo.toml.bak Cargo.toml
-
+mv src/main.rs.bak src/main.rs

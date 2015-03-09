@@ -1,7 +1,5 @@
-extern crate sdl;
 
-use self::sdl::video::{Surface};
-
+use sdl::video::{Surface};
 use std::num::Float;
 
 pub struct State {
@@ -33,7 +31,10 @@ impl State {
         let fx = x as f32;
         let fy = y as f32;
         let dist = Float::sqrt(fx*fx + fy*fy) as u8;
-        (dist, 3*(y as u8)-0xFF-10*(self.t as u8), 7*(self.t as u8))
+
+        (dist,
+            ((3*y+10*self.t) % 0x100) as u8,
+            ((7*self.t) % 0x100) as u8)
     }
 }
 
