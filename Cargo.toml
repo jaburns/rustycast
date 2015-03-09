@@ -12,5 +12,8 @@ path = "src/main_basic.rs"
 [dependencies.sdl]
 path = "lib/rust-sdl"
 
+[dependencies.sdl_image]
+path = "lib/rust-sdl/src/sdl_image"
+
 [dependencies]
 rand = "0.1.3"

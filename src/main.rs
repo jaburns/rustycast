@@ -1,7 +1,10 @@
 extern crate sdl;
+extern crate sdl_image;
 
-use self::sdl::video::{SurfaceFlag, VideoFlag};
+use self::sdl::video::{Surface, SurfaceFlag, VideoFlag};
 use self::sdl::event::{Event};
+
+use self::sdl_image::{InitFlag};
 
 use std::num::Float;
 
@@ -18,6 +21,21 @@ fn get_color(x: usize, y: usize, t: usize) -> (u8, u8, u8) {
 }
 
 
+fn draw_pattern(surf: &Surface, t: usize) {
+    surf.with_lock(|pixels| {
+        for x in 0..WIDTH {
+            for y in 0..HEIGHT {
+                let (r, g, b) = get_color(x, y, t);
+                pixels[3*(WIDTH*y+x) + 0] = b;
+                pixels[3*(WIDTH*y+x) + 1] = g;
+                pixels[3*(WIDTH*y+x) + 2] = r;
+            }
+        }
+        true
+    });
+}
+
+
 pub fn real_main() {
     sdl::init(&[sdl::InitFlag::Video]);
     sdl::wm::set_caption("RustyCast", "RustyCast");
@@ -27,6 +45,13 @@ pub fn real_main() {
                                                   &[VideoFlag::DoubleBuf]) {
         Ok(screen) => screen,
         Err(err) => panic!("failed to set video mode: {}", err)
+    };
+
+    sdl_image::init(&[InitFlag::PNG]);
+
+    let img = match sdl_image::load(&Path::new("thing.png")) {
+        Ok(img) => img,
+        Err(err) => panic!("Failed to load image")
     };
 
     let mut t = 0;
@@ -40,19 +65,13 @@ pub fn real_main() {
             }
         }
 
-        screen.with_lock(|pixels| {
-            for x in 0..WIDTH {
-                for y in 0..HEIGHT {
-                    let (r, g, b) = get_color(x, y, t);
-                    pixels[3*(WIDTH*y+x) + 0] = b;
-                    pixels[3*(WIDTH*y+x) + 1] = g;
-                    pixels[3*(WIDTH*y+x) + 2] = r;
-                }
-            }
-            true
-        });
-
         t = t + 1;
+
+        if (t / 100) % 2 == 0 {
+            draw_pattern(&screen, t);
+        } else {
+            screen.blit(&img);
+        }
 
         screen.flip();
     }
