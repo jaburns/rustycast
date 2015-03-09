@@ -21,3 +21,5 @@ rustc_cmd="$(cargo build -v 2>/dev/null | tee /dev/tty | grep 'src\/main\.rs' | 
 $rustc_cmd -C link-args="-lSDLmain -lSDL -Wl,-framework,Cocoa"
 
 mv src/main.rs.bak src/main.rs
+
+[[ "$1" == 'run' ]] && target/debug/rustycast

@@ -1,10 +1,11 @@
+#![feature(old_path)]
 
 extern crate sdl;
 extern crate sdl_image;
 
 mod state;
 
-use sdl::video::{Surface, SurfaceFlag, VideoFlag};
+use sdl::video::{SurfaceFlag, VideoFlag};
 use sdl::event::{Event};
 use sdl_image::{InitFlag};
 
@@ -25,9 +26,9 @@ fn main() {
 
     sdl_image::init(&[InitFlag::PNG]);
 
-    let img = match sdl_image::load(&Path::new("thing.png")) {
+    let img = match sdl_image::load(&Path::new("res/thing.png")) {
         Ok(img) => img,
-        Err(err) => panic!("Failed to load image")
+        Err(err) => panic!("Failed to load image: {}", err)
     };
 
     let mut game_state = state::State { t: 0 };
