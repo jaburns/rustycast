@@ -6,35 +6,10 @@ use self::sdl::event::{Event};
 
 use self::sdl_image::{InitFlag};
 
-use std::num::Float;
+use state;
 
 static WIDTH:  usize = 320;
 static HEIGHT: usize = 240;
-
-
-fn get_color(x: usize, y: usize, t: usize) -> (u8, u8, u8) {
-    let fx = x as f32;
-    let fy = y as f32;
-    let dist = Float::sqrt(fx*fx + fy*fy) as u8;
-
-    (dist, 3*(y as u8)-0xFF-10*(t as u8), 7*(t as u8))
-}
-
-
-fn draw_pattern(surf: &Surface, t: usize) {
-    surf.with_lock(|pixels| {
-        for x in 0..WIDTH {
-            for y in 0..HEIGHT {
-                let (r, g, b) = get_color(x, y, t);
-                pixels[3*(WIDTH*y+x) + 0] = b;
-                pixels[3*(WIDTH*y+x) + 1] = g;
-                pixels[3*(WIDTH*y+x) + 2] = r;
-            }
-        }
-        true
-    });
-}
-
 
 pub fn real_main() {
     sdl::init(&[sdl::InitFlag::Video]);
@@ -54,7 +29,7 @@ pub fn real_main() {
         Err(err) => panic!("Failed to load image")
     };
 
-    let mut t = 0;
+    let mut game_state = state::State { t: 0 };
 
     'main : loop {
         'event : loop {
@@ -65,10 +40,10 @@ pub fn real_main() {
             }
         }
 
-        t = t + 1;
+        game_state.step();
 
-        if (t / 100) % 2 == 0 {
-            draw_pattern(&screen, t);
+        if (game_state.t / 100) % 2 == 0 {
+            game_state.draw(&screen);
         } else {
             screen.blit(&img);
         }
