@@ -1,5 +1,4 @@
 
-use std::f32::consts;
 use std::num::Float;
 use std::ops::{Add, Sub, Mul, Neg, Div};
 

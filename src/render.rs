@@ -1,9 +1,8 @@
 
-use std::num::Float;
 use sdl::video::{Surface};
 
 use map::{Map};
-use math::{LineSeg, Vec2, Mat3};
+use math::{LineSeg, Mat3};
 
 
 pub fn render_map(surf: &Surface, map: &Map, theta: f32) {
@@ -18,7 +17,6 @@ fn draw_seg(surf: &Surface, seg: &LineSeg) {
     let w = surf.get_width() as usize;
     let h = surf.get_height() as usize;
     let len = seg.get_length();
-    let ulen = len as usize;
 
     surf.with_lock(|pixels| {
         for t in 0..(len as usize) {

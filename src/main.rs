@@ -1,5 +1,3 @@
-#![feature(old_path)]
-#![feature(core)]
 #![allow(dead_code)]
 
 extern crate sdl;
@@ -8,10 +6,10 @@ extern crate sdl_image;
 mod math;
 mod map;
 mod render;
+mod input;
 
 use sdl::video::{SurfaceFlag, VideoFlag};
 use sdl::event::{Event};
-use sdl_image::{InitFlag};
 
 
 const WIDTH:  usize = 320;
@@ -30,11 +28,15 @@ fn main() {
     };
 
     let map = map::temp_map();
+    let mut inputs = input::InputState::new();
     let mut theta = 0.0;
 
     'main : loop {
         'event : loop {
-            match sdl::event::poll_event() {
+            let event = sdl::event::poll_event();
+            inputs.check_event(&event);
+
+            match event {
                 Event::Quit => break 'main,
                 Event::None => break 'event,
                 _ => {}
@@ -50,6 +52,7 @@ fn main() {
     sdl::quit();
 }
 
+//    use sdl_image::{InitFlag};
 //    sdl_image::init(&[InitFlag::PNG]);
 //    let img = match sdl_image::load(&Path::new("res/thing.png")) {
 //        Ok(img) => img,
