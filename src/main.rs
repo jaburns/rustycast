@@ -1,4 +1,5 @@
 #![feature(old_path)]
+#![feature(core)]
 
 extern crate sdl;
 extern crate sdl_image;
