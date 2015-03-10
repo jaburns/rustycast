@@ -21,9 +21,12 @@ impl InputState {
                 } else {
                     self.keys_down.retain(|&k| k != key);
                 }
-                println!("{:?}", self.keys_down);
             }
             _ => {}
         }
+    }
+
+    pub fn has_key(&self, key: Key) -> bool {
+        self.keys_down.iter().find(|&k| *k == key).is_some()
     }
 }

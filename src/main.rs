@@ -5,7 +5,7 @@ extern crate sdl_image;
 
 mod math;
 mod map;
-mod render;
+mod game;
 mod input;
 
 use sdl::video::{SurfaceFlag, VideoFlag};
@@ -27,9 +27,13 @@ fn main() {
         Err(err) => panic!("failed to set video mode: {}", err)
     };
 
-    let map = map::temp_map();
     let mut inputs = input::InputState::new();
-    let mut theta = 0.0;
+
+    let mut game = game::Game {
+        pos: math::V2_ORIGIN,
+        face_angle: 0.0,
+        map: &map::temp_map(),
+    };
 
     'main : loop {
         'event : loop {
@@ -43,8 +47,8 @@ fn main() {
             }
         }
 
-        theta += 0.01;
-        render::render_map(&screen, &map, theta);
+        game.step(&inputs);
+        game.render(&screen);
 
         screen.flip();
     }
