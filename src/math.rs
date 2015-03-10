@@ -1,9 +1,8 @@
 
-use std::ops::{Add, Sub, Mul, Neg, Div};
-use std::num::Float;
 use std::f32::consts;
+use std::num::Float;
+use std::ops::{Add, Sub, Mul, Neg, Div};
 
-// ---------------------------------------------------------------------------
 
 #[derive(Copy)]
 pub struct Vec2 {
@@ -32,7 +31,6 @@ pub const M3_IDENTITY: Mat3 = Mat3 {
     a20: 0.0, a21: 0.0, a22: 1.0,
 };
 
-// ----- Operator overloading ------------------------------------------------
 
 impl Add<Vec2> for Vec2 {
     type Output = Vec2;
@@ -98,7 +96,6 @@ impl Mul<Vec2> for Mat3 {
     }
 }
 
-// ---------------------------------------------------------------------------
 
 impl Vec2 {
     pub fn new(x: f32, y: f32) -> Vec2 {
@@ -168,14 +165,16 @@ impl LineSeg {
         }
     }
 
-    #[allow(unused_variables)]
-    pub fn intersects_at(self, rhs: LineSeg) -> Option<f32> {
-        None // TODO
+    pub fn get_length_sqr(self) -> f32 {
+        (self.b - self.a).get_length_sqr()
     }
 
-    #[allow(unused_variables)]
-    pub fn point_at(self, t: f32) -> Vec2 {
-        V2_ORIGIN // TODO
+    pub fn get_length(self) -> f32 {
+        (self.b - self.a).get_length()
+    }
+
+    pub fn at(self, t: f32) -> Vec2 {
+        self.a + (self.b - self.a)*t
     }
 
     pub fn transform(self, mat: Mat3) -> LineSeg {
@@ -184,14 +183,10 @@ impl LineSeg {
             b: mat * self.b,
         }
     }
-}
 
-// ---------------------------------------------------------------------------
-
-fn main() {
-    let a = LineSeg::new(-10.0, -10.0, 10.0, -10.0);
-    let c = a.transform(Mat3::rotation(consts::FRAC_PI_4));
-    println!("{}, {}", c.a.x, c.a.y);
-    println!("{}, {}", c.b.x, c.b.y);
+    #[allow(unused_variables)]
+    pub fn intersects_at(self, rhs: LineSeg) -> Option<f32> {
+        None // TODO
+    }
 }
 

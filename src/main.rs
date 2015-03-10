@@ -1,17 +1,21 @@
 #![feature(old_path)]
 #![feature(core)]
+#![allow(dead_code)]
 
 extern crate sdl;
 extern crate sdl_image;
 
-mod state;
+mod math;
+mod map;
+mod render;
 
 use sdl::video::{SurfaceFlag, VideoFlag};
 use sdl::event::{Event};
 use sdl_image::{InitFlag};
 
-static WIDTH:  usize = 320;
-static HEIGHT: usize = 240;
+
+const WIDTH:  usize = 320;
+const HEIGHT: usize = 240;
 
 
 fn main() {
@@ -25,14 +29,7 @@ fn main() {
         Err(err) => panic!("failed to set video mode: {}", err)
     };
 
-    sdl_image::init(&[InitFlag::PNG]);
-
-    let img = match sdl_image::load(&Path::new("res/thing.png")) {
-        Ok(img) => img,
-        Err(err) => panic!("Failed to load image: {}", err)
-    };
-
-    let mut game_state = state::State { t: 0 };
+    let map = map::temp_map();
 
     'main : loop {
         'event : loop {
@@ -43,16 +40,17 @@ fn main() {
             }
         }
 
-        game_state.step();
-
-        if (game_state.t / 100) % 2 == 0 {
-            game_state.draw(&screen);
-        } else {
-            screen.blit(&img);
-        }
+        render::render_map(&screen, &map);
 
         screen.flip();
     }
 
     sdl::quit();
 }
+
+//    sdl_image::init(&[InitFlag::PNG]);
+//    let img = match sdl_image::load(&Path::new("res/thing.png")) {
+//        Ok(img) => img,
+//        Err(err) => panic!("Failed to load image: {}", err)
+//    };
+
