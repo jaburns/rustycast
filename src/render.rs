@@ -6,10 +6,11 @@ use map::{Map};
 use math::{LineSeg, Vec2, Mat3};
 
 
-pub fn render_map(surf: &Surface, map: &Map) {
+pub fn render_map(surf: &Surface, map: &Map, theta: f32) {
     surf.clear();
     for wall in map.walls.iter() {
-        draw_seg(&surf, &wall);
+        let wall1 = wall.transform(Mat3::rotation(theta));
+        draw_seg(&surf, &wall1);
     }
 }
 

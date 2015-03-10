@@ -30,6 +30,7 @@ fn main() {
     };
 
     let map = map::temp_map();
+    let mut theta = 0.0;
 
     'main : loop {
         'event : loop {
@@ -40,7 +41,8 @@ fn main() {
             }
         }
 
-        render::render_map(&screen, &map);
+        theta += 0.01;
+        render::render_map(&screen, &map, theta);
 
         screen.flip();
     }
