@@ -106,15 +106,22 @@ impl<'a> Game<'a> {
             -Float::cos(self.face_angle)
         );
 
+        let mut shortest: Option<f32> = None;
+
         for wall in self.map.walls.iter() {
             match ray.intersects_at(*wall) {
                 Some(t) => {
-                    return Some((wall.at(t) - self.pos).project(face_vec).get_length());
+                    let dist = (wall.at(t) - self.pos).project(face_vec).get_length();
+                    shortest = match shortest {
+                        Some(d) => { if dist < d { Some(dist) } else { shortest } }
+                        None    => { Some(dist) }
+                    }
                 }
                 None => {}
             };
         }
-        None
+
+        shortest
     }
 }
 
