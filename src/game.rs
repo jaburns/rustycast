@@ -6,6 +6,7 @@ use sdl::event::{Key};
 use map::{Map};
 use math::{LineSeg, Vec2, Mat3};
 use input::{InputState};
+use math;
 
 
 pub struct Game<'a> {
@@ -51,7 +52,23 @@ impl<'a> Game<'a> {
             draw_seg(&surf, &wall.transform(trans), 0xFF, 0x00, 0x00);
         }
 
-        draw_seg(&surf, &LineSeg::new(0.0, 0.0, 0.0, -5.0), 0x00, 0xFF, 0x00);
+
+        let w = surf.get_width() as usize;
+        for x in 0..w {
+            let offset = ((x as f32) - (w as f32) / 2.0) / 600.0;
+            let (q1,q2) = self.cast_ray(offset);
+            match q1 {
+                Some(dist) => {
+                    let hit = Vec2::new(
+                         Float::sin(self.face_angle),
+                        -Float::cos(self.face_angle)
+                    ) * dist;
+                    let draw_sg = LineSeg::new(self.pos.x, self.pos.y, q2.x, q2.y);
+                    draw_seg(&surf, &draw_sg.transform(trans), 0x00, 0xFF, 0x00);
+                }
+                None => {}
+            }
+        }
     }
 
     fn render_cast(&self, surf: &Surface) {
@@ -62,7 +79,8 @@ impl<'a> Game<'a> {
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / 600.0;
-                match self.cast_ray(offset) {
+                let (q1,q2) = self.cast_ray(offset);
+                match q1 {
                     Some(dist) => {
                         let ray_height = (3000.0 / dist) as usize;
                         let top = if h > ray_height { (h - ray_height) / 2 } else { 0 };
@@ -93,7 +111,7 @@ impl<'a> Game<'a> {
         });
     }
 
-    fn cast_ray(&self, offset: f32) -> Option<f32> {
+    fn cast_ray(&self, offset: f32) -> (Option<f32>, Vec2) {
         let ray = LineSeg::new(
             self.pos.x,
             self.pos.y,
@@ -107,21 +125,22 @@ impl<'a> Game<'a> {
         );
 
         let mut shortest: Option<f32> = None;
+        let mut vv: Vec2 = math::V2_ORIGIN;
 
         for wall in self.map.walls.iter() {
             match ray.intersects_at(*wall) {
                 Some(t) => {
                     let dist = (wall.at(t) - self.pos).project(face_vec).get_length();
                     shortest = match shortest {
-                        Some(d) => { if dist < d { Some(dist) } else { shortest } }
-                        None    => { Some(dist) }
+                        Some(d) => { if dist < d { vv = wall.at(t); Some(dist) } else { shortest } }
+                        None    => { vv = wall.at(t); Some(dist) }
                     }
                 }
                 None => {}
             };
         }
 
-        shortest
+        (shortest, vv)
     }
 }
 
