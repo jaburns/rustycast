@@ -128,23 +128,20 @@ impl<'a> Game<'a> {
             self.pos.y - 1000.0*Float::cos(self.face_angle + offset)
         );
 
-        let mut shortest: Option<f32> = None;
-        let mut vv: Vec2 = math::V2_ORIGIN;
+        let cos_offset = Float::cos(offset);
 
-        for wall in self.map.walls.iter() {
-            match ray.intersects_at(*wall) {
-                Some(t) => {
-                    let dist = (wall.at(t) - self.pos).get_length() * Float::cos(offset);
-                    shortest = match shortest {
-                        Some(d) => { if dist < d { vv = wall.at(t); Some(dist) } else { shortest } }
-                        None    => { vv = wall.at(t); Some(dist) }
-                    }
-                }
-                None => {}
-            };
+        let (dist,pos) = self.map.walls.iter()
+            .filter_map(|&wall| ray.intersects_at(wall).map(|t| wall.at(t)))
+            .map(|int| ((int - self.pos).get_length() * cos_offset, int))
+            .fold((Float::max_value(), math::V2_ORIGIN), |(shortest, _), (dist, pos)| {
+                (if dist < shortest { dist } else { shortest }, pos)
+            });
+
+        if dist < 1.0e5 {
+            (Some(dist), pos)
+        } else {
+            (None, math::V2_ORIGIN)
         }
-
-        (shortest, vv)
     }
 }
 
