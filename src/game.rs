@@ -16,23 +16,38 @@ pub struct Game<'a> {
     pub show_map: bool,
 }
 
+const SPEED: f32 = 0.4;
+const TURN: f32 = 0.03;
+const FOV_DIV: f32 = 500.0;
+const WALL: f32 = 3000.0;
+
 impl<'a> Game<'a> {
+
     pub fn step(&mut self, input: &InputState) {
         if input.has_key(Key::Left) {
-            self.face_angle -= 0.02;
+            self.face_angle -= TURN;
         }
         if input.has_key(Key::Right) {
-            self.face_angle += 0.02;
+            self.face_angle += TURN;
         }
-        if input.has_key(Key::Up) {
-            self.pos.x += Float::sin(self.face_angle);
-            self.pos.y -= Float::cos(self.face_angle);
+        if input.has_key(Key::W) {
+            self.pos.x += SPEED*Float::sin(self.face_angle);
+            self.pos.y -= SPEED*Float::cos(self.face_angle);
         }
-        if input.has_key(Key::Down) {
-            self.pos.x -= Float::sin(self.face_angle);
-            self.pos.y += Float::cos(self.face_angle);
+        if input.has_key(Key::S) {
+            self.pos.x -= SPEED*Float::sin(self.face_angle);
+            self.pos.y += SPEED*Float::cos(self.face_angle);
+        }
+        if input.has_key(Key::A) {
+            self.pos.x -= SPEED*Float::cos(self.face_angle);
+            self.pos.y -= SPEED*Float::sin(self.face_angle);
+        }
+        if input.has_key(Key::D) {
+            self.pos.x += SPEED*Float::cos(self.face_angle);
+            self.pos.y += SPEED*Float::sin(self.face_angle);
         }
         self.show_map = input.has_key(Key::Tab);
+        }
     }
 
     pub fn render(&self, surf: &Surface) {
@@ -55,7 +70,7 @@ impl<'a> Game<'a> {
 
         let w = surf.get_width() as usize;
         for x in 0..w {
-            let offset = ((x as f32) - (w as f32) / 2.0) / 600.0;
+            let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
             let (q1,q2) = self.cast_ray(offset);
             match q1 {
                 Some(dist) => {
@@ -78,11 +93,11 @@ impl<'a> Game<'a> {
         surf.clear();
         surf.with_lock(|pixels| {
             for x in 0..w {
-                let offset = ((x as f32) - (w as f32) / 2.0) / 600.0;
+                let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
                 let (q1,q2) = self.cast_ray(offset);
                 match q1 {
                     Some(dist) => {
-                        let ray_height = (3000.0 / dist) as usize;
+                        let ray_height = (WALL / dist) as usize;
                         let top = if h > ray_height { (h - ray_height) / 2 } else { 0 };
                         let bottom = h - top;
                         let proto_color = (0xFF-(h/2) + ray_height/2);
@@ -119,18 +134,13 @@ impl<'a> Game<'a> {
             self.pos.y - 1000.0*Float::cos(self.face_angle + offset)
         );
 
-        let face_vec = Vec2::new(
-             Float::sin(self.face_angle),
-            -Float::cos(self.face_angle)
-        );
-
         let mut shortest: Option<f32> = None;
         let mut vv: Vec2 = math::V2_ORIGIN;
 
         for wall in self.map.walls.iter() {
             match ray.intersects_at(*wall) {
                 Some(t) => {
-                    let dist = (wall.at(t) - self.pos).project(face_vec).get_length();
+                    let dist = (wall.at(t) - self.pos).get_length() * Float::cos(offset);
                     shortest = match shortest {
                         Some(d) => { if dist < d { vv = wall.at(t); Some(dist) } else { shortest } }
                         None    => { vv = wall.at(t); Some(dist) }
