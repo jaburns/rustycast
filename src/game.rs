@@ -69,10 +69,9 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-            let (q1,q2) = self.cast_ray(offset);
-            match q1 {
-                Some(_) => {
-                    let draw_sg = LineSeg::new(self.pos.x, self.pos.y, q2.x, q2.y);
+            match self.cast_ray(offset) {
+                Some((_, pos)) => {
+                    let draw_sg = LineSeg::new(self.pos.x, self.pos.y, pos.x, pos.y);
                     draw_seg(&surf, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
                 }
                 None => {}
@@ -88,9 +87,8 @@ impl<'a> Game<'a> {
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-                let (q1,_) = self.cast_ray(offset);
-                match q1 {
-                    Some(dist) => {
+                match self.cast_ray(offset) {
+                    Some((dist, _)) => {
                         let ray_height = (WALL / dist) as usize;
                         let top = if h > ray_height { (h - ray_height) / 2 } else { 0 };
                         let bottom = h - top;
@@ -120,7 +118,7 @@ impl<'a> Game<'a> {
         });
     }
 
-    fn cast_ray(&self, offset: f32) -> (Option<f32>, Vec2) {
+    fn cast_ray(&self, offset: f32) -> Option<(f32, Vec2)> {
         let ray = LineSeg::new(
             self.pos.x,
             self.pos.y,
@@ -130,18 +128,14 @@ impl<'a> Game<'a> {
 
         let cos_offset = Float::cos(offset);
 
-        let (dist,pos) = self.map.walls.iter()
+        let (dist, pos) = self.map.walls.iter()
             .filter_map(|&wall| ray.intersects_at(wall).map(|t| wall.at(t)))
             .map(|int| ((int - self.pos).get_length() * cos_offset, int))
             .fold((Float::max_value(), math::V2_ORIGIN), |(shortest, _), (dist, pos)| {
                 (if dist < shortest { dist } else { shortest }, pos)
             });
 
-        if dist < 1.0e5 {
-            (Some(dist), pos)
-        } else {
-            (None, math::V2_ORIGIN)
-        }
+        if dist < 1.0e5 { Some((dist, pos)) } else { None }
     }
 }
 
