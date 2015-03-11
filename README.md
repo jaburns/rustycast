@@ -1,1 +1,1 @@
-![](http://www.gfycat.com/OffbeatJovialHuemul.gif)
+![](http://zippy.gfycat.com/OffbeatJovialHuemul.gif)
