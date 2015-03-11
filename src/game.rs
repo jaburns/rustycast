@@ -3,16 +3,15 @@ use std::num::Float;
 use sdl::video::{Surface};
 use sdl::event::{Key};
 
-use map::{Map};
+use world::{World};
 use math::{LineSeg, Vec2, Mat3};
 use input::{InputState};
-use math;
 
 
 pub struct Game<'a> {
     pub pos: Vec2,
     pub face_angle: f32,
-    pub map: &'a Map,
+    pub world: &'a World,
     pub show_map: bool,
 }
 
@@ -62,14 +61,14 @@ impl<'a> Game<'a> {
                   * Mat3::translation(-self.pos);
 
         surf.clear();
-        for wall in self.map.walls.iter() {
+        for wall in self.world.walls.iter() {
             draw_seg(&surf, wall.transform(trans), 0xFF, 0x00, 0x00);
         }
 
         let w = surf.get_width() as usize;
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-            match self.cast_ray(offset) {
+            match self.world.cast_ray(self.pos, self.face_angle + offset) {
                 Some((_, pos)) => {
                     let draw_sg = LineSeg::new(self.pos.x, self.pos.y, pos.x, pos.y);
                     draw_seg(&surf, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
@@ -87,9 +86,9 @@ impl<'a> Game<'a> {
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-                match self.cast_ray(offset) {
+                match self.world.cast_ray(self.pos, self.face_angle + offset) {
                     Some((dist, _)) => {
-                        let ray_height = (WALL / dist) as usize;
+                        let ray_height = (WALL / (dist * Float::cos(offset))) as usize;
                         let top = if h > ray_height { (h - ray_height) / 2 } else { 0 };
                         let bottom = h - top;
                         let proto_color = 0xFF-(h/2) + ray_height/2;
@@ -118,25 +117,6 @@ impl<'a> Game<'a> {
         });
     }
 
-    fn cast_ray(&self, offset: f32) -> Option<(f32, Vec2)> {
-        let ray = LineSeg::new(
-            self.pos.x,
-            self.pos.y,
-            self.pos.x + 1000.0*Float::sin(self.face_angle + offset),
-            self.pos.y - 1000.0*Float::cos(self.face_angle + offset)
-        );
-
-        let cos_offset = Float::cos(offset);
-
-        let (dist, pos) = self.map.walls.iter()
-            .filter_map(|&wall| ray.intersects_at(wall).map(|t| wall.at(t)))
-            .map(|int| ((int - self.pos).get_length() * cos_offset, int))
-            .fold((Float::max_value(), math::V2_ORIGIN), |(shortest, _), (dist, pos)| {
-                (if dist < shortest { dist } else { shortest }, pos)
-            });
-
-        if dist < 1.0e5 { Some((dist, pos)) } else { None }
-    }
 }
 
 fn put_px(pixels: &mut [u8], w: usize, x: usize, y: usize, r: u8, g: u8, b: u8) {

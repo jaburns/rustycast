@@ -4,7 +4,7 @@ extern crate sdl;
 extern crate sdl_image;
 
 mod math;
-mod map;
+mod world;
 mod game;
 mod input;
 
@@ -32,7 +32,7 @@ fn main() {
     let mut game = game::Game {
         pos: math::V2_ORIGIN,
         face_angle: 0.0,
-        map: &map::temp_map(),
+        world: &world::temp(),
         show_map: false
     };
 
