@@ -120,6 +120,10 @@ impl Vec2 {
     pub fn normalize(self) -> Vec2 {
         self / self.get_length()
     }
+
+    pub fn project(self, rhs: Vec2) -> Vec2 {
+        rhs * (self.dot(rhs) / rhs.get_length_sqr())
+    }
 }
 
 impl Mat3 {
@@ -183,9 +187,29 @@ impl LineSeg {
         }
     }
 
-    #[allow(unused_variables)]
     pub fn intersects_at(self, rhs: LineSeg) -> Option<f32> {
-        None // TODO
+        let dx1x3 = self.a.x-rhs.a.x;
+        let dy1y3 = self.a.y-rhs.a.y;
+        let dx2x1 = self.b.x-self.a.x;
+        let dy2y1 = self.b.y-self.a.y;
+        let dx4x3 = rhs.b.x-rhs.a.x;
+        let dy4y3 = rhs.b.y-rhs.a.y;
+
+        let denom = dy4y3*dx2x1 - dx4x3*dy2y1;
+        let numa  = dx4x3*dy1y3 - dy4y3*dx1x3;
+        let numb  = dx2x1*dy1y3 - dy2y1*dx1x3;
+
+        if denom.abs() < 1.0e-20 {
+            None
+        } else {
+            let nna = numa / denom;
+            let nnb = numb / denom;
+            if nna >= 0.0 && nna <= 1.0 && nnb >= 0.0 && nnb <= 1.0 {
+                Some(nnb)
+            } else {
+                None
+            }
+        }
     }
 }
 

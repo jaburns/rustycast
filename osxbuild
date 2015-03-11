@@ -22,4 +22,6 @@ $rustc_cmd -C link-args="-lSDLmain -lSDL -Wl,-framework,Cocoa"
 
 mv src/main.rs.bak src/main.rs
 
-[[ "$1" == 'run' ]] && target/debug/rustycast
+if [[ "$1" == 'run' ]]; then
+    target/debug/rustycast
+fi

@@ -33,6 +33,7 @@ fn main() {
         pos: math::V2_ORIGIN,
         face_angle: 0.0,
         map: &map::temp_map(),
+        show_map: false
     };
 
     'main : loop {
