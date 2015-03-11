@@ -63,22 +63,17 @@ impl<'a> Game<'a> {
 
         surf.clear();
         for wall in self.map.walls.iter() {
-            draw_seg(&surf, &wall.transform(trans), 0xFF, 0x00, 0x00);
+            draw_seg(&surf, wall.transform(trans), 0xFF, 0x00, 0x00);
         }
-
 
         let w = surf.get_width() as usize;
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
             let (q1,q2) = self.cast_ray(offset);
             match q1 {
-                Some(dist) => {
-                    let hit = Vec2::new(
-                         Float::sin(self.face_angle),
-                        -Float::cos(self.face_angle)
-                    ) * dist;
+                Some(_) => {
                     let draw_sg = LineSeg::new(self.pos.x, self.pos.y, q2.x, q2.y);
-                    draw_seg(&surf, &draw_sg.transform(trans), 0x00, 0xFF, 0x00);
+                    draw_seg(&surf, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
                 }
                 None => {}
             }
@@ -93,13 +88,13 @@ impl<'a> Game<'a> {
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-                let (q1,q2) = self.cast_ray(offset);
+                let (q1,_) = self.cast_ray(offset);
                 match q1 {
                     Some(dist) => {
                         let ray_height = (WALL / dist) as usize;
                         let top = if h > ray_height { (h - ray_height) / 2 } else { 0 };
                         let bottom = h - top;
-                        let proto_color = (0xFF-(h/2) + ray_height/2);
+                        let proto_color = 0xFF-(h/2) + ray_height/2;
                         let color = if proto_color > 0xFF { 0xFF } else { proto_color as u8 };
                         for y in 0..top {
                             put_px(pixels, w, x, y, 0, 0x66, 0xFF);
@@ -159,7 +154,7 @@ fn put_px(pixels: &mut [u8], w: usize, x: usize, y: usize, r: u8, g: u8, b: u8) 
     pixels[3*(w*y+x) + 2] = r;
 }
 
-fn draw_seg(surf: &Surface, seg: &LineSeg, r: u8, g: u8, b: u8) {
+fn draw_seg(surf: &Surface, seg: LineSeg, r: u8, g: u8, b: u8) {
     let w = surf.get_width() as usize;
     let h = surf.get_height() as usize;
     let len = seg.get_length();
