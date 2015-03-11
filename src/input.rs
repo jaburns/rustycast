@@ -2,13 +2,13 @@
 use sdl::event::{Event, Key};
 
 pub struct InputState {
-    pub keys_down: Vec<Key>
+    _keys_down: Vec<Key>
 }
 
 impl InputState {
     pub fn new() -> InputState {
         InputState {
-            keys_down: vec![]
+            _keys_down: vec![]
         }
     }
 
@@ -16,10 +16,10 @@ impl InputState {
         match *event {
             Event::Key(key, down, _, _) => {
                 if down {
-                    self.keys_down.push(key);
-                    self.keys_down.dedup();
+                    self._keys_down.push(key);
+                    self._keys_down.dedup();
                 } else {
-                    self.keys_down.retain(|&k| k != key);
+                    self._keys_down.retain(|&k| k != key);
                 }
             }
             _ => {}
@@ -27,6 +27,6 @@ impl InputState {
     }
 
     pub fn has_key(&self, key: Key) -> bool {
-        self.keys_down.iter().find(|&k| *k == key).is_some()
+        self._keys_down.iter().find(|&k| *k == key).is_some()
     }
 }
