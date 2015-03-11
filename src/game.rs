@@ -47,7 +47,6 @@ impl<'a> Game<'a> {
             self.pos.y += SPEED*Float::sin(self.face_angle);
         }
         self.show_map = input.has_key(Key::Tab);
-        }
     }
 
     pub fn render(&self, surf: &Surface) {
