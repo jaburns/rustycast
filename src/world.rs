@@ -9,6 +9,7 @@ pub struct World {
     pub walls: Vec<LineSeg>
 }
 
+
 pub fn temp() -> World {
     World {
         walls: vec![
@@ -28,21 +29,22 @@ pub fn temp() -> World {
     }
 }
 
+
 impl World {
-    pub fn cast_ray(&self, pos: Vec2, angle: f32) -> Option<(f32, Vec2)> {
+    pub fn cast_ray(&self, pos: Vec2, angle: f32) -> Option<(f32, Vec2, f32)> {
         let ray = LineSeg::new(
             pos.x, pos.y,
             pos.x + 1000.0*Float::sin(angle),
             pos.y - 1000.0*Float::cos(angle)
         );
 
-        let (dist, pos) = self.walls.iter()
-            .filter_map(|&wall| ray.intersects_at(wall).map(|t| wall.at(t)))
-            .map(|int| ((int - pos).get_length(), int))
-            .fold((f32::MAX, V2_ORIGIN), |(short_dist, short_pos), (dist, pos)| {
-                if dist < short_dist { (dist, pos) } else { (short_dist, short_pos) }
+        let (dist, pos, along) = self.walls.iter()
+            .filter_map(|&wall| ray.intersects_at(wall).map(|t| (wall.at(t), wall.get_length()*t)))
+            .map(|(int, along)| ((int - pos).get_length(), int, along))
+            .fold((f32::MAX, V2_ORIGIN, 0.0), |(short_dist, short_pos, short_along), (dist, pos, along)| {
+                if dist < short_dist { (dist, pos, along) } else { (short_dist, short_pos, short_along) }
             });
 
-        if dist < f32::MAX { Some((dist, pos)) } else { None }
+        if dist < f32::MAX { Some((dist, pos, along)) } else { None }
     }
 }
