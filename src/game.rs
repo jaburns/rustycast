@@ -68,13 +68,11 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-            match self.world.cast_ray(self.pos, self.face_angle + offset) {
-                Some((_, pos)) => {
-                    let draw_sg = LineSeg::new(self.pos.x, self.pos.y, pos.x, pos.y);
-                    draw_seg(&surf, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
-                }
-                None => {}
-            }
+
+            self.world.cast_ray(self.pos, self.face_angle + offset).map(|(_, pos)| {
+                let draw_sg = LineSeg::new(self.pos.x, self.pos.y, pos.x, pos.y);
+                draw_seg(&surf, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
+            });
         }
     }
 
@@ -86,32 +84,21 @@ impl<'a> Game<'a> {
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-                match self.world.cast_ray(self.pos, self.face_angle + offset) {
+
+                let (top, bottom) = match self.world.cast_ray(self.pos, self.face_angle + offset) {
                     Some((dist, _)) => {
-                        let ray_height = (WALL / (dist * Float::cos(offset))) as usize;
-                        let top = if h > ray_height { (h - ray_height) / 2 } else { 0 };
-                        let bottom = h - top;
-                        let proto_color = 0xFF-(h/2) + ray_height/2;
-                        let color = if proto_color > 0xFF { 0xFF } else { proto_color as u8 };
-                        for y in 0..top {
-                            put_px(pixels, w, x, y, 0, 0x66, 0xFF);
-                        }
-                        for y in top..bottom {
-                            put_px(pixels, w, x, y, color, 0, 0);
-                        }
-                        for y in bottom..h {
-                            put_px(pixels, w, x, y, 0, 0xBB, 0);
-                        }
+                        let px_height = (WALL / (dist * Float::cos(offset))) as usize;
+                        let top = if h > px_height { (h - px_height) / 2 } else { 0 };
+                        (top, h-top)
                     }
-                    None => {
-                        for y in 0..(h/2) {
-                            put_px(pixels, w, x, y, 0, 0x66, 0xFF);
-                        }
-                        for y in (h/2)..h {
-                            put_px(pixels, w, x, y, 0, 0xBB, 0);
-                        }
-                    }
-                }
+                    None => { (h/2, h/2) }
+                };
+
+                let color = if top == 0 || top == h/2 { 0xFF } else { (0xFF-top) as u8 };
+
+                for y in 0..top      { put_px(pixels, w, x, y,  0x00, 0x66, 0xFF); }
+                for y in top..bottom { put_px(pixels, w, x, y, color, 0x00, 0x00); }
+                for y in bottom..h   { put_px(pixels, w, x, y,  0x00, 0xBB, 0x00); }
             }
             true
         });
