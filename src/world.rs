@@ -39,8 +39,8 @@ impl World {
         let (dist, pos) = self.walls.iter()
             .filter_map(|&wall| ray.intersects_at(wall).map(|t| wall.at(t)))
             .map(|int| ((int - pos).get_length(), int))
-            .fold((f32::MAX, V2_ORIGIN), |(shortest, _), (dist, pos)| {
-                (if dist < shortest { dist } else { shortest }, pos)
+            .fold((f32::MAX, V2_ORIGIN), |(short_dist, short_pos), (dist, pos)| {
+                if dist < short_dist { (dist, pos) } else { (short_dist, short_pos) }
             });
 
         if dist < f32::MAX { Some((dist, pos)) } else { None }
