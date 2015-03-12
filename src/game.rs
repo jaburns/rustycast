@@ -23,40 +23,33 @@ const WALL: f32 = 3000.0;
 impl<'a> Game<'a> {
 
     pub fn step(&mut self, input: &InputState) {
-        if input.has_key(Key::Left) {
-            self.face_angle -= TURN;
-        }
-        if input.has_key(Key::Right) {
-            self.face_angle += TURN;
-        }
-        if input.has_key(Key::W) {
-            self.pos.x += SPEED*Float::sin(self.face_angle);
-            self.pos.y -= SPEED*Float::cos(self.face_angle);
-        }
-        if input.has_key(Key::S) {
-            self.pos.x -= SPEED*Float::sin(self.face_angle);
-            self.pos.y += SPEED*Float::cos(self.face_angle);
-        }
-        if input.has_key(Key::A) {
-            self.pos.x -= SPEED*Float::cos(self.face_angle);
-            self.pos.y -= SPEED*Float::sin(self.face_angle);
-        }
-        if input.has_key(Key::D) {
-            self.pos.x += SPEED*Float::cos(self.face_angle);
-            self.pos.y += SPEED*Float::sin(self.face_angle);
-        }
+        if input.has_key(Key::Left)  { self.face_angle -= TURN; }
+        if input.has_key(Key::Right) { self.face_angle += TURN; }
+
+        if input.has_key(Key::W) { self.do_move( 1.0,  0.0); }
+        if input.has_key(Key::S) { self.do_move(-1.0,  0.0); }
+        if input.has_key(Key::A) { self.do_move( 0.0, -1.0); }
+        if input.has_key(Key::D) { self.do_move( 0.0,  1.0); }
+
         self.show_map = input.has_key(Key::Tab);
+    }
+
+    fn do_move(&mut self, para: f32, perp: f32) {
+        let sin = SPEED*Float::sin(self.face_angle);
+        let cos = SPEED*Float::cos(self.face_angle);
+        self.pos.x +=  sin*para + cos*perp;
+        self.pos.y += -cos*para + sin*perp;
     }
 
     pub fn render(&self, surf: &Surface) {
         if self.show_map {
-            self.render_lines(&surf);
+            self.render_map(&surf);
         } else {
-            self.render_cast(&surf);
+            self.render_game(&surf);
         }
     }
 
-    fn render_lines(&self, surf: &Surface) {
+    fn render_map(&self, surf: &Surface) {
         let trans = Mat3::rotation(-self.face_angle)
                   * Mat3::translation(-self.pos);
 
@@ -76,7 +69,7 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn render_cast(&self, surf: &Surface) {
+    fn render_game(&self, surf: &Surface) {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
@@ -103,7 +96,6 @@ impl<'a> Game<'a> {
             true
         });
     }
-
 }
 
 fn put_px(pixels: &mut [u8], w: usize, x: usize, y: usize, r: u8, g: u8, b: u8) {
