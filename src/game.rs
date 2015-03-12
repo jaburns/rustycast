@@ -93,7 +93,6 @@ impl<'a> Game<'a> {
 
                 let brightness = ((0xFF - top) as f32) / 255.0;
                 for y in top..bottom {
-                    let look_x = (along * 36.0) as u8;
                     let tex_lookup = ((along * 36.0) as u8)
                                    ^ ((255.0*(((y-top)as f32)/(bottom-top)as f32)) as u8);
                     let color = ((tex_lookup as f32) * brightness) as u8;
