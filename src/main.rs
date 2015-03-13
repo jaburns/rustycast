@@ -9,11 +9,11 @@ mod game;
 mod input;
 
 use sdl::video::{SurfaceFlag, VideoFlag};
-use sdl::event::{Event};
+use sdl::event::{Event, Key};
 
 
-const WIDTH:  usize = 320;
-const HEIGHT: usize = 240;
+const WIDTH:  usize = 640;
+const HEIGHT: usize = 480;
 
 
 fn main() {
@@ -22,7 +22,8 @@ fn main() {
 
     let screen = match sdl::video::set_video_mode(WIDTH as isize, HEIGHT as isize, 24,
                                                   &[SurfaceFlag::HWSurface],
-                                                  &[VideoFlag::DoubleBuf]) {
+                                                  &[ VideoFlag::DoubleBuf]) {
+        //VideoFlag::Fullscreen,
         Ok(screen) => screen,
         Err(err) => panic!("failed to set video mode: {}", err)
     };
@@ -46,6 +47,10 @@ fn main() {
                 Event::None => break 'event,
                 _ => {}
             }
+        }
+
+        if inputs.has_key(Key::Escape) {
+            break 'main;
         }
 
         game.step(&inputs);

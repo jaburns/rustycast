@@ -11,8 +11,8 @@ use input::{InputState};
 const SPEED: f32 = 0.4;
 const TURN: f32 = 0.03;
 
-const FOV_DIV: f32 = 300.0;
-const VISPLANE_DIST: f32 = 300.0;
+const FOV_DIV: f32 = 600.0;
+const VISPLANE_DIST: f32 = 600.0;
 const WALL_HEIGHT: f32 = 10.0;
 const PERSON_HEIGHT: f32 = 5.0;
 
