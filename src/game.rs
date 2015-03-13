@@ -10,8 +10,11 @@ use input::{InputState};
 
 const SPEED: f32 = 0.4;
 const TURN: f32 = 0.03;
-const FOV_DIV: f32 = 500.0;
-const WALL: f32 = 3000.0;
+
+const FOV_DIV: f32 = 300.0;
+const VISPLANE_DIST: f32 = 300.0;
+const WALL_HEIGHT: f32 = 10.0;
+const PERSON_HEIGHT: f32 = 5.0;
 
 
 pub struct Game<'a> {
@@ -79,17 +82,16 @@ impl<'a> Game<'a> {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
 
-                let (top, bottom, along) = match self.world.cast_ray(self.pos, self.face_angle + offset) {
-                    Some((dist, _, along)) => {
-                        let px_height = (WALL / (dist * Float::cos(offset))) as usize;
-                        let top = if h > px_height { (h - px_height) / 2 } else { 0 };
-                        (top, h-top, along)
-                    }
-                    None => { (h/2, h/2, 0.0) }
-                };
+                let cast = self.world.cast_ray(self.pos, self.face_angle + offset);
+                if !cast.is_some() { continue; }
+                let (dist, hit_pos, along) = cast.unwrap();
 
-                for y in 0..top      { put_px(pixels, w, x, y,  0x00, 0x66, 0xFF); }
-                for y in bottom..h   { put_px(pixels, w, x, y,  0x00, 0xBB, 0x00); }
+                let cast_dist = dist * Float::cos(offset);
+                let px_height = (VISPLANE_DIST * WALL_HEIGHT / cast_dist) as usize;
+                let top = if h > px_height { (h - px_height) / 2 } else { 0 };
+                let bottom = h - top;
+
+                for y in 0..top { put_px(pixels, w, x, y,  0x00, 0x66, 0xFF); }
 
                 let brightness = ((0xFF - top) as f32) / 255.0;
                 for y in top..bottom {
@@ -97,6 +99,13 @@ impl<'a> Game<'a> {
                                    ^ ((255.0*(((y-top)as f32)/(bottom-top)as f32)) as u8);
                     let color = ((tex_lookup as f32) * brightness) as u8;
                     put_px(pixels, w, x, y, color, 0x00, 0x00);
+                }
+
+                for y in bottom..h {
+                    let dist_floor = VISPLANE_DIST * PERSON_HEIGHT / ((y as f32) - (h as f32)/2.0);
+                    let floor_pos = self.pos + (hit_pos - self.pos) * dist_floor / cast_dist;
+                    let color = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
+                    put_px(pixels, w, x, y, 0x00, color, 0x00);
                 }
             }
             true
