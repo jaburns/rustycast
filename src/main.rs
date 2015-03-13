@@ -10,6 +10,7 @@ mod input;
 
 use sdl::video::{SurfaceFlag, VideoFlag};
 use sdl::event::{Event, Key};
+use sdl_image::{InitFlag};
 
 
 const WIDTH:  usize = 640;
@@ -26,6 +27,12 @@ fn main() {
         //VideoFlag::Fullscreen,
         Ok(screen) => screen,
         Err(err) => panic!("failed to set video mode: {}", err)
+    };
+
+    sdl_image::init(&[InitFlag::PNG]);
+    let sky = match sdl_image::load(&Path::new("res/sky.png")) {
+        Ok(img) => img,
+        Err(err) => panic!("Failed to load image: {}", err)
     };
 
     let mut inputs = input::InputState::new();
@@ -53,6 +60,8 @@ fn main() {
             break 'main;
         }
 
+        screen.blit(&sky);
+
         game.step(&inputs);
         game.render(&screen);
 
@@ -62,10 +71,4 @@ fn main() {
     sdl::quit();
 }
 
-//    use sdl_image::{InitFlag};
-//    sdl_image::init(&[InitFlag::PNG]);
-//    let img = match sdl_image::load(&Path::new("res/thing.png")) {
-//        Ok(img) => img,
-//        Err(err) => panic!("Failed to load image: {}", err)
-//    };
 

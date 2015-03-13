@@ -55,7 +55,8 @@ impl<'a> Game<'a> {
 
     fn render_map(&self, surf: &Surface) {
         let trans = Mat3::rotation(-self.face_angle)
-                  * Mat3::translation(-self.pos);
+                  * Mat3::translation(-self.pos)
+                  * Mat3::scale(Vec2::new(2.0, 2.0));
 
         surf.clear();
         for wall in self.world.walls.iter() {
@@ -77,7 +78,6 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
-        surf.clear();
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
@@ -91,14 +91,12 @@ impl<'a> Game<'a> {
                 let top = if h > px_height { (h - px_height) / 2 } else { 0 };
                 let bottom = h - top;
 
-                for y in 0..top { put_px(pixels, w, x, y,  0x00, 0x66, 0xFF); }
-
                 let brightness = ((0xFF - top) as f32) / 255.0;
                 for y in top..bottom {
-                    let tex_lookup = ((along * 36.0) as u8)
-                                   ^ ((255.0*(((y-top)as f32)/(bottom-top)as f32)) as u8);
+                    let yy = (y as f32 - (h as f32 - px_height as f32) / 2.0) / px_height as f32;
+                    let tex_lookup = (along * 25.0) as u8 ^ (255.0*yy) as u8;
                     let color = ((tex_lookup as f32) * brightness) as u8;
-                    put_px(pixels, w, x, y, color, 0x00, 0x00);
+                    put_px(pixels, w, x, y, color / 2, color / 2, color);
                 }
 
                 for y in bottom..h {
