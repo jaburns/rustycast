@@ -103,8 +103,10 @@ impl<'a> Game<'a> {
 
                 for y in bottom..h {
                     let dist_floor = VISPLANE_DIST * PERSON_HEIGHT / ((y as f32) - (h as f32)/2.0);
+                    let brightness = ((0xFF - (h-y)) as f32) / 255.0;
                     let floor_pos = self.pos + (hit_pos - self.pos) * dist_floor / cast_dist;
-                    let color = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
+                    let tex_lookup = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
+                    let color = ((tex_lookup as f32) * brightness) as u8;
                     put_px(pixels, w, x, y, 0x00, color, 0x00);
                 }
             }
