@@ -1,1 +1,1 @@
-### [Demo](http://giant.gfycat.com/SaneTenseDassierat)
+### [Demo](http://gfycat.com/SaneTenseDassierat)
