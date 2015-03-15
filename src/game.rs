@@ -3,7 +3,7 @@ use std::num::Float;
 use sdl::video::{Surface};
 use sdl::event::{Key};
 
-use world::{World};
+use world::{World, RayCastResult};
 use math::{LineSeg, Vec2, Mat3};
 use input::{InputState};
 
@@ -59,7 +59,7 @@ impl<'a> Game<'a> {
                   * Mat3::scale(Vec2::new(2.0, 2.0));
 
         surf.clear();
-        for wall in self.world.walls.iter() {
+        for wall in self.world.get_walls().iter() {
             draw_seg(&surf, wall.transform(trans), 0xFF, 0x00, 0x00);
         }
 
@@ -67,7 +67,7 @@ impl<'a> Game<'a> {
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
 
-            self.world.cast_ray(self.pos, self.face_angle + offset).map(|(_, pos, _)| {
+            self.world.cast_ray(self.pos, self.face_angle + offset).map(|RayCastResult {pos, ..}| {
                 let draw_sg = LineSeg::new(self.pos.x, self.pos.y, pos.x, pos.y);
                 draw_seg(&surf, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
             });
@@ -84,7 +84,7 @@ impl<'a> Game<'a> {
 
                 let cast = self.world.cast_ray(self.pos, self.face_angle + offset);
                 if !cast.is_some() { continue; }
-                let (dist, hit_pos, along) = cast.unwrap();
+                let RayCastResult {dist, pos: hit_pos, along} = cast.unwrap();
 
                 let cast_dist = dist * Float::cos(offset);
                 let px_height = (VISPLANE_DIST * WALL_HEIGHT / cast_dist) as usize;
