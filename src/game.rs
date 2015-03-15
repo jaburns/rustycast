@@ -14,7 +14,7 @@ const TURN: f32 = 0.03;
 const FOV_DIV: f32 = 600.0;
 const VISPLANE_DIST: f32 = 600.0;
 const WALL_HEIGHT_: f32 = 10.0;
-const PERSON_HEIGHT: f32 = 5.0;
+const PERSON_HEIGHT_: f32 = 5.0;
 
 
 pub struct Game<'a> {
@@ -81,6 +81,7 @@ impl<'a> Game<'a> {
         let h = surf.get_height() as usize;
 
         let WALL_HEIGHT = WALL_HEIGHT_ + self.t;
+        let PERSON_HEIGHT = PERSON_HEIGHT_ + Float::abs(Float::sin(self.t * 3.0)) * 5.0;
 
         surf.with_lock(|pixels| {
             for x in 0..w {
