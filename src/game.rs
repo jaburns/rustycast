@@ -13,7 +13,7 @@ const TURN: f32 = 0.03;
 
 const FOV_DIV: f32 = 600.0;
 const VISPLANE_DIST: f32 = 600.0;
-const WALL_HEIGHT: f32 = 10.0;
+const WALL_HEIGHT_: f32 = 10.0;
 const PERSON_HEIGHT: f32 = 5.0;
 
 
@@ -22,6 +22,7 @@ pub struct Game<'a> {
     pub face_angle: f32,
     pub world: &'a World,
     pub show_map: bool,
+    pub t: f32
 }
 
 
@@ -36,6 +37,7 @@ impl<'a> Game<'a> {
         if input.has_key(Key::D) { self.do_move( 0.0,  1.0); }
 
         self.show_map = input.has_key(Key::Tab);
+        self.t += 0.02;
     }
 
     fn do_move(&mut self, para: f32, perp: f32) {
@@ -78,6 +80,8 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
+        let WALL_HEIGHT = WALL_HEIGHT_ + self.t;
+
         surf.with_lock(|pixels| {
             for x in 0..w {
                 let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
@@ -87,14 +91,19 @@ impl<'a> Game<'a> {
                 let RayCastResult {dist, pos: hit_pos, along} = cast.unwrap();
 
                 let cast_dist = dist * Float::cos(offset);
-                let px_height = (VISPLANE_DIST * WALL_HEIGHT / cast_dist) as usize;
-                let top = if h > px_height { (h - px_height) / 2 } else { 0 };
-                let bottom = h - top;
+
+                let pxheight = (VISPLANE_DIST * WALL_HEIGHT / cast_dist) as isize;
+
+                let bottompx = h as isize/2 + (VISPLANE_DIST * PERSON_HEIGHT / cast_dist) as isize;
+                let toppx = bottompx - pxheight;
+
+                let top = if toppx < h as isize && toppx >= 0 { toppx as usize } else { 0 };
+                let bottom = if bottompx < h as isize && bottompx >= 0 { bottompx as usize } else { h };
 
                 let brightness = ((0xFF - top) as f32) / 255.0;
                 for y in top..bottom {
-                    let yy = (y as f32 - (h as f32 - px_height as f32) / 2.0) / px_height as f32;
-                    let tex_lookup = (along * 25.0) as u8 ^ (255.0*yy) as u8;
+                    //let yy = (y as f32 - (h as f32 - px_height as f32) / 2.0) / px_height as f32;
+                    let tex_lookup = (along * 25.0) as u8 ^ 42; // (255.0*yy) as u8;
                     let color = ((tex_lookup as f32) * brightness) as u8;
                     put_px(pixels, w, x, y, color / 2, color / 2, color);
                 }

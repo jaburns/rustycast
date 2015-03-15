@@ -43,7 +43,8 @@ fn main() {
         pos: math::V2_ORIGIN,
         face_angle: 0.0,
         world: &world::temp(),
-        show_map: false
+        show_map: false,
+        t: 0.0
     };
 
     'main : loop {
