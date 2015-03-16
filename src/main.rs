@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-#![feature(old_path)]
 #![feature(core)]
 
 extern crate sdl;
@@ -11,12 +10,15 @@ mod world;
 mod game;
 mod input;
 
+use std::time::Duration;
+
+use time::PreciseTime;
+
 use sdl::video::{SurfaceFlag, VideoFlag};
 use sdl::event::{Event, Key};
+use sdl::wm::{GrabMode};
+use std::path::{Path};
 use sdl_image::{InitFlag};
-
-use std::time::Duration;
-use time::PreciseTime;
 
 
 const WIDTH:  usize = 320;
@@ -37,7 +39,7 @@ fn main() {
         Err(err) => panic!("failed to set video mode: {}", err)
     };
 
-    sdl::mouse::grab_input(true);
+    sdl::wm::grab_input(GrabMode::On);
     sdl::mouse::set_cursor_visible(false);
 
     sdl_image::init(&[InitFlag::PNG]);
