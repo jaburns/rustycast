@@ -11,8 +11,8 @@ use input::{InputState};
 const SPEED: f32 = 0.4;
 const TURN: f32 = 0.03;
 
-const FOV_DIV: f32 = 600.0;
-const VISPLANE_DIST: f32 = 600.0;
+const FOV_DIV: f32 = 300.0;
+const VISPLANE_DIST: f32 = 300.0;
 const BASE_WALL_HEIGHT: f32 = 10.0;
 const PERSON_HEIGHT: f32 = 5.0;
 
@@ -28,8 +28,8 @@ pub struct Game<'a> {
 
 impl<'a> Game<'a> {
     pub fn step(&mut self, input: &InputState) {
-        if input.has_key(Key::Left)  { self.face_angle -= TURN; }
-        if input.has_key(Key::Right) { self.face_angle += TURN; }
+        if input.mouse_dx() < -1.0 { self.face_angle -= TURN; }
+        if input.mouse_dx() >  1.0 { self.face_angle += TURN; }
 
         if input.has_key(Key::W) { self.do_move( 1.0,  0.0); }
         if input.has_key(Key::S) { self.do_move(-1.0,  0.0); }
@@ -80,7 +80,7 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
-        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t * 3.0)) * 10.0;
+        let person_height = PERSON_HEIGHT;// + Float::abs(Float::sin(self.t * 3.0)) * 10.0;
 
         surf.with_lock(|pixels| {
             for x in 0..w {

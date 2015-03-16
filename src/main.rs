@@ -19,8 +19,8 @@ use std::time::Duration;
 use time::PreciseTime;
 
 
-const WIDTH:  usize = 640;
-const HEIGHT: usize = 480;
+const WIDTH:  usize = 320;
+const HEIGHT: usize = 240;
 
 
 fn main() {
@@ -36,6 +36,9 @@ fn main() {
         Ok(screen) => screen,
         Err(err) => panic!("failed to set video mode: {}", err)
     };
+
+    sdl::mouse::grab_input(true);
+    sdl::mouse::set_cursor_visible(false);
 
     sdl_image::init(&[InitFlag::PNG]);
     let sky = match sdl_image::load(&Path::new("res/sky.png")) {
@@ -57,6 +60,7 @@ fn main() {
     'main : loop {
         //let mut last_time = PreciseTime::now();
 
+        inputs.clear_mouse();
         'event : loop {
             let event = sdl::event::poll_event();
             inputs.check_event(&event);
