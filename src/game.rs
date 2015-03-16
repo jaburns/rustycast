@@ -61,7 +61,7 @@ impl<'a> Game<'a> {
                   * Mat3::scale(Vec2::new(2.0, 2.0));
 
         surf.clear();
-        for wall in self.world.get_walls().iter() {
+        for wall in self.world.get_walls().iter().map(|x| x.seg) {
             draw_seg(&surf, wall.transform(trans), 0xFF, 0x00, 0x00);
         }
 
@@ -80,7 +80,7 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
-        let wall_height = BASE_WALL_HEIGHT + self.t;
+        //let wall_height = BASE_WALL_HEIGHT + self.t;
         let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t * 3.0)) * 5.0;
 
         surf.with_lock(|pixels| {
@@ -89,11 +89,11 @@ impl<'a> Game<'a> {
 
                 let cast = self.world.cast_ray(self.pos, self.face_angle + offset);
                 if !cast.is_some() { continue; }
-                let RayCastResult {dist, pos: hit_pos, along} = cast.unwrap();
+                let RayCastResult {dist, pos: hit_pos, along, height} = cast.unwrap();
 
                 let cast_dist = dist * Float::cos(offset);
 
-                let pxheight = (VISPLANE_DIST * wall_height / cast_dist) as isize;
+                let pxheight = (VISPLANE_DIST * height / cast_dist) as isize;
                 let bottompx = h as isize/2 + (VISPLANE_DIST * person_height / cast_dist) as isize;
                 let toppx = bottompx - pxheight;
                 let top = if toppx < h as isize && toppx >= 0 { toppx as usize } else { 0 };
@@ -101,7 +101,7 @@ impl<'a> Game<'a> {
 
                 let brightness = (20.0 / cast_dist).min(1.0).max(0.0);
                 for y in top..bottom {
-                    let yy = (bottompx as usize - y) as f32 / pxheight as f32 * wall_height / 15.0;
+                    let yy = (bottompx as usize - y) as f32 / pxheight as f32 * height / 15.0;
                     let tex_lookup = (along * 25.0) as u8 ^ (512.0*yy) as u8;
                     let color = ((tex_lookup as f32) * brightness) as u8;
                     put_px(pixels, w, x, y, color / 2, color / 2, color);
