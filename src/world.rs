@@ -74,14 +74,12 @@ impl World {
             pos.y - 1000.0*Float::cos(angle)
         );
 
-        let (d2, wall, t) = self._walls.iter().filter_map(|&wall| {
-                ray.intersects_at(wall.seg).map(|t| (wall, t))
-            })
+        let (d2, wall, t) = self._walls.iter()
+            .filter_map(|&wall| ray.intersects_at(wall.seg).map(|t| (wall, t)))
             .fold((f32::MAX, W_ZERO, 0.0), |(s_d2, s_wall, s_t), (wall, t)| {
                 let d2 = (pos - wall.seg.at(t)).get_length_sqr();
                 if d2 < s_d2 { (d2, wall, t) } else { (s_d2, s_wall, s_t) }
             });
-
 
         if d2 < f32::MAX {
             Some(RayCastResult {

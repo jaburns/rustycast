@@ -80,8 +80,7 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
-        //let wall_height = BASE_WALL_HEIGHT + self.t;
-        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t * 3.0)) * 5.0;
+        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t * 3.0)) * 10.0;
 
         surf.with_lock(|pixels| {
             for x in 0..w {
@@ -96,8 +95,13 @@ impl<'a> Game<'a> {
                 let pxheight = (VISPLANE_DIST * height / cast_dist) as isize;
                 let bottompx = h as isize/2 + (VISPLANE_DIST * person_height / cast_dist) as isize;
                 let toppx = bottompx - pxheight;
-                let top = if toppx < h as isize && toppx >= 0 { toppx as usize } else { 0 };
-                let bottom = if bottompx < h as isize && bottompx >= 0 { bottompx as usize } else { h };
+
+                if toppx >= h as isize || bottompx < 0 {
+                    continue;
+                }
+
+                let top = if toppx >= 0 { toppx as usize } else { 0 };
+                let bottom = if bottompx < h as isize { bottompx as usize } else { h };
 
                 let brightness = (20.0 / cast_dist).min(1.0).max(0.0);
                 for y in top..bottom {
