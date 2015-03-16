@@ -1,3 +1,0 @@
-[submodule "lib/rust-sdl"]
-	path = lib/rust-sdl
-	url = git@github.com:jaburns/rust-sdl
