@@ -3,6 +3,7 @@
 #![feature(core)]
 
 extern crate sdl;
+extern crate time;
 extern crate sdl_image;
 
 mod math;
@@ -13,6 +14,9 @@ mod input;
 use sdl::video::{SurfaceFlag, VideoFlag};
 use sdl::event::{Event, Key};
 use sdl_image::{InitFlag};
+
+use std::time::Duration;
+use time::PreciseTime;
 
 
 const WIDTH:  usize = 640;
@@ -25,7 +29,9 @@ fn main() {
 
     let screen = match sdl::video::set_video_mode(WIDTH as isize, HEIGHT as isize, 24,
                                                   &[SurfaceFlag::HWSurface],
-                                                  &[ VideoFlag::DoubleBuf]) {
+                                                  &[
+                                                   // VideoFlag::Fullscreen,
+                                                    VideoFlag::DoubleBuf]) {
         //VideoFlag::Fullscreen,
         Ok(screen) => screen,
         Err(err) => panic!("failed to set video mode: {}", err)
@@ -47,7 +53,10 @@ fn main() {
         t: 0.0
     };
 
+
     'main : loop {
+        //let mut last_time = PreciseTime::now();
+
         'event : loop {
             let event = sdl::event::poll_event();
             inputs.check_event(&event);
@@ -69,6 +78,8 @@ fn main() {
         game.render(&screen);
 
         screen.flip();
+
+        //println!("{}", last_time.to(PreciseTime::now()).num_milliseconds());
     }
 
     sdl::quit();

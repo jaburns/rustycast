@@ -96,6 +96,18 @@ impl<'a> Game<'a> {
                 let bottompx = h as isize/2 + (VISPLANE_DIST * person_height / cast_dist) as isize;
                 let toppx = bottompx - pxheight;
 
+                if toppx > h as isize/2 {
+                    let topfloor = if toppx >= h as isize { h as isize } else { toppx };
+                    for y in (h as isize/2)..topfloor {
+                        let dist_floor = VISPLANE_DIST * (person_height - height) / ((y as f32) - (h as f32)/2.0);
+                        let brightness = (20.0 / dist_floor).min(1.0).max(0.0);
+                        let floor_pos = self.pos + (hit_pos - self.pos) * dist_floor / cast_dist;
+                        let tex_lookup = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
+                        let color = ((tex_lookup as f32) * brightness) as u8;
+                        put_px(pixels, w, x, y as usize, 0x00, color, 0x00);
+                    }
+                }
+
                 if toppx >= h as isize || bottompx < 0 {
                     continue;
                 }
@@ -104,6 +116,8 @@ impl<'a> Game<'a> {
                 let bottom = if bottompx < h as isize { bottompx as usize } else { h };
 
                 let brightness = (20.0 / cast_dist).min(1.0).max(0.0);
+
+
                 for y in top..bottom {
                     let yy = (bottompx as usize - y) as f32 / pxheight as f32 * height / 15.0;
                     let tex_lookup = (along * 25.0) as u8 ^ (512.0*yy) as u8;

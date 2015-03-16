@@ -5,7 +5,13 @@ dependencies = [
  "rand 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl 0.3.6",
  "sdl_image 0.3.6",
+ "time 0.1.20 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "gcc"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "libc"
@@ -38,5 +44,14 @@ name = "sdl_image"
 version = "0.3.6"
 dependencies = [
  "sdl 0.3.6",
+]
+
+[[package]]
+name = "time"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "gcc 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
