@@ -13,8 +13,8 @@ const TURN: f32 = 0.03;
 
 const FOV_DIV: f32 = 600.0;
 const VISPLANE_DIST: f32 = 600.0;
-const WALL_HEIGHT_: f32 = 10.0;
-const PERSON_HEIGHT_: f32 = 5.0;
+const BASE_WALL_HEIGHT: f32 = 10.0;
+const PERSON_HEIGHT: f32 = 5.0;
 
 
 pub struct Game<'a> {
@@ -80,8 +80,8 @@ impl<'a> Game<'a> {
         let w = surf.get_width() as usize;
         let h = surf.get_height() as usize;
 
-        let WALL_HEIGHT = WALL_HEIGHT_ + self.t;
-        let PERSON_HEIGHT = PERSON_HEIGHT_ + Float::abs(Float::sin(self.t * 3.0)) * 5.0;
+        let wall_height = BASE_WALL_HEIGHT + self.t;
+        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t * 3.0)) * 5.0;
 
         surf.with_lock(|pixels| {
             for x in 0..w {
@@ -93,25 +93,23 @@ impl<'a> Game<'a> {
 
                 let cast_dist = dist * Float::cos(offset);
 
-                let pxheight = (VISPLANE_DIST * WALL_HEIGHT / cast_dist) as isize;
-
-                let bottompx = h as isize/2 + (VISPLANE_DIST * PERSON_HEIGHT / cast_dist) as isize;
+                let pxheight = (VISPLANE_DIST * wall_height / cast_dist) as isize;
+                let bottompx = h as isize/2 + (VISPLANE_DIST * person_height / cast_dist) as isize;
                 let toppx = bottompx - pxheight;
-
                 let top = if toppx < h as isize && toppx >= 0 { toppx as usize } else { 0 };
                 let bottom = if bottompx < h as isize && bottompx >= 0 { bottompx as usize } else { h };
 
-                let brightness = ((0xFF - top) as f32) / 255.0;
+                let brightness = (20.0 / cast_dist).min(1.0).max(0.0);
                 for y in top..bottom {
-                    //let yy = (y as f32 - (h as f32 - px_height as f32) / 2.0) / px_height as f32;
-                    let tex_lookup = (along * 25.0) as u8 ^ 42; // (255.0*yy) as u8;
+                    let yy = (bottompx as usize - y) as f32 / pxheight as f32 * wall_height / 15.0;
+                    let tex_lookup = (along * 25.0) as u8 ^ (512.0*yy) as u8;
                     let color = ((tex_lookup as f32) * brightness) as u8;
                     put_px(pixels, w, x, y, color / 2, color / 2, color);
                 }
 
                 for y in bottom..h {
-                    let dist_floor = VISPLANE_DIST * PERSON_HEIGHT / ((y as f32) - (h as f32)/2.0);
-                    let brightness = ((0xFF - (h-y)) as f32) / 255.0;
+                    let dist_floor = VISPLANE_DIST * person_height / ((y as f32) - (h as f32)/2.0);
+                    let brightness = (20.0 / dist_floor).min(1.0).max(0.0);
                     let floor_pos = self.pos + (hit_pos - self.pos) * dist_floor / cast_dist;
                     let tex_lookup = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
                     let color = ((tex_lookup as f32) * brightness) as u8;
