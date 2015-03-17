@@ -28,8 +28,9 @@ pub struct Game<'a> {
 
 impl<'a> Game<'a> {
     pub fn step(&mut self, input: &InputState) {
-        if input.mouse_dx() < -1.0 { self.face_angle -= TURN; }
-        if input.mouse_dx() >  1.0 { self.face_angle += TURN; }
+        self.face_angle += input.mouse_dx() / 1000.0;
+        //if input.mouse_dx() < -1.0 { self.face_angle -= TURN; }
+        //if input.mouse_dx() >  1.0 { self.face_angle += TURN; }
 
         if input.has_key(Key::W) { self.do_move( 1.0,  0.0); }
         if input.has_key(Key::S) { self.do_move(-1.0,  0.0); }

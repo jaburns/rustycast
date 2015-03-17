@@ -26,7 +26,6 @@ impl InputState {
             }
             Event::MouseMotion(_, _, _, dx, _) => {
                 self._mouse_dx = dx as f32;
-                println!("{}", dx);
             }
             _ => {}
         }
