@@ -11,13 +11,13 @@ mod game;
 mod input;
 
 use std::time::Duration;
+use std::path::Path;
 
 use time::PreciseTime;
 
 use sdl::video::{SurfaceFlag, VideoFlag};
-use sdl::event::{Event, Key};
+use sdl::event::{Event};
 use sdl::wm::{GrabMode};
-use std::path::{Path};
 use sdl_image::{InitFlag};
 
 
@@ -74,14 +74,18 @@ fn main() {
             }
         }
 
-        if inputs.has_key(Key::Escape) {
+        if inputs.has_key(input::Key::Quit) {
             break 'main;
         }
 
         screen.blit(&sky);
 
         game.step(&inputs);
-        game.render(&screen);
+        screen.clear();
+        screen.with_lock(|pixels| {
+            game.render(pixels, screen.get_width() as usize, screen.get_height() as usize);
+            true
+        });
 
         screen.flip();
 

@@ -1,9 +1,33 @@
 
-use sdl::event::{Event, Key};
+use sdl::event;
+use sdl::event::{Event};
+
+
+#[derive(Copy,Clone,PartialEq)]
+pub enum Key {
+    Left,
+    Right,
+    Forward,
+    Back,
+    ShowMap,
+    Quit,
+}
 
 pub struct InputState {
     _keys_down: Vec<Key>,
     _mouse_dx: f32,
+}
+
+fn map_sdl_key(key: event::Key) -> Option<Key> {
+    match key {
+        event::Key::W      => Some(Key::Forward),
+        event::Key::S      => Some(Key::Back),
+        event::Key::A      => Some(Key::Left),
+        event::Key::D      => Some(Key::Right),
+        event::Key::Tab    => Some(Key::ShowMap),
+        event::Key::Escape => Some(Key::Quit),
+        _ => None
+    }
 }
 
 impl InputState {
@@ -17,11 +41,16 @@ impl InputState {
     pub fn check_event(&mut self, event: &Event) {
         match *event {
             Event::Key(key, down, _, _) => {
-                if down {
-                    self._keys_down.push(key);
-                    self._keys_down.dedup();
-                } else {
-                    self._keys_down.retain(|&k| k != key);
+                match map_sdl_key(key) {
+                    Some(key) => {
+                        if down {
+                            self._keys_down.push(key);
+                            self._keys_down.dedup();
+                        } else {
+                            self._keys_down.retain(|&k| k != key);
+                        }
+                    }
+                    None => {}
                 }
             }
             Event::MouseMotion(_, _, _, dx, _) => {
