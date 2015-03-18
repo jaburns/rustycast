@@ -1,3 +1,6 @@
 [submodule "lib/rust-sdl"]
 	path = lib/rust-sdl
 	url = git@github.com:brson/rust-sdl
+[submodule "lib/rust-sdl2"]
+	path = lib/rust-sdl2
+	url = git@github.com:AngryLawyer/rust-sdl2

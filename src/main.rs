@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 #![feature(core)]
 
-extern crate sdl;
+extern crate sdl2;
 extern crate time;
-extern crate sdl_image;
 
 mod math;
 mod world;
@@ -15,41 +14,44 @@ use std::path::Path;
 
 use time::PreciseTime;
 
-use sdl::video::{SurfaceFlag, VideoFlag};
-use sdl::event::{Event};
-use sdl::wm::{GrabMode};
-use sdl_image::{InitFlag};
+use sdl2::video::{Window, WindowPos, OPENGL};
+use sdl2::mouse;
+use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer};
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::rect::Rect;
+use sdl2::event::Event;
+use sdl2::keycode::KeyCode;
 
+use std::rand;
 
-const WIDTH:  usize = 320;
-const HEIGHT: usize = 240;
+const WINDOW_WIDTH  :i32 = 320;
+const WINDOW_HEIGHT :i32 = 240;
 
+const W :usize = 320;
+const H :usize = 240;
 
-fn main() {
-    sdl::init(&[sdl::InitFlag::Video]);
-    sdl::wm::set_caption("RustyCast", "RustyCast");
+pub fn main() {
+    let sdl_context = sdl2::init(sdl2::INIT_VIDEO).unwrap();
 
-    let screen = match sdl::video::set_video_mode(WIDTH as isize, HEIGHT as isize, 24,
-                                                  &[SurfaceFlag::HWSurface],
-                                                  &[
-                                                   // VideoFlag::Fullscreen,
-                                                    VideoFlag::DoubleBuf]) {
-        //VideoFlag::Fullscreen,
-        Ok(screen) => screen,
-        Err(err) => panic!("failed to set video mode: {}", err)
+    let window = match Window::new("RustyCast", WindowPos::PosCentered, WindowPos::PosCentered, WINDOW_WIDTH, WINDOW_HEIGHT, OPENGL) {
+        Ok(window) => window,
+        Err(err) => panic!("failed to create window: {}", err)
     };
 
-    sdl::wm::grab_input(GrabMode::On);
-    sdl::mouse::set_cursor_visible(false);
+    window.set_grab(true);
+    mouse::set_relative_mouse_mode(true);
 
-    sdl_image::init(&[InitFlag::PNG]);
-    let sky = match sdl_image::load(&Path::new("res/sky.png")) {
-        Ok(img) => img,
-        Err(err) => panic!("Failed to load image: {}", err)
+    let renderer = match Renderer::from_window(window, RenderDriverIndex::Auto, ACCELERATED) {
+        Ok(renderer) => renderer,
+        Err(err) => panic!("failed to create renderer: {}", err)
     };
+
+    let mut texture = renderer.create_texture_streaming(PixelFormatEnum::RGB24, (W as i32, H as i32)).unwrap();
+    let mut drawer = renderer.drawer();
+    let mut event_pump = sdl_context.event_pump();
+
 
     let mut inputs = input::InputState::new();
-
     let mut game = game::Game {
         pos: math::V2_ORIGIN,
         face_angle: 0.0,
@@ -58,41 +60,30 @@ fn main() {
         t: 0.0
     };
 
-
     'main : loop {
-        //let mut last_time = PreciseTime::now();
+        let last_time = PreciseTime::now();
 
-        inputs.clear_mouse();
-        'event : loop {
-            let event = sdl::event::poll_event();
+        for event in event_pump.poll_iter() {
             inputs.check_event(&event);
-
             match event {
-                Event::Quit => break 'main,
-                Event::None => break 'event,
+                Event::Quit {..} => { break 'main; },
                 _ => {}
             }
         }
 
-        if inputs.has_key(input::Key::Quit) {
+        if (inputs.has_key(input::Key::Quit)) {
             break 'main;
         }
 
-        screen.blit(&sky);
-
         game.step(&inputs);
-        screen.clear();
-        screen.with_lock(|pixels| {
-            game.render(pixels, screen.get_width() as usize, screen.get_height() as usize);
-            true
-        });
+        texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
+            game.render(buffer, W, H);
+        }).unwrap();
 
-        screen.flip();
+        drawer.copy(&texture, None, Some(Rect::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)));
+        drawer.present();
 
-        //println!("{}", last_time.to(PreciseTime::now()).num_milliseconds());
+        println!("{}", last_time.to(PreciseTime::now()).num_milliseconds());
     }
-
-    sdl::quit();
 }
-
 

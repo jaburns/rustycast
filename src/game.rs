@@ -74,7 +74,7 @@ impl<'a> Game<'a> {
     }
 
     fn render_game(&self, pixels: &mut [u8], w: usize, h: usize) {
-        let person_height = PERSON_HEIGHT;// + Float::abs(Float::sin(self.t * 3.0)) * 10.0;
+        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t)) * 10.0;
 
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
@@ -87,7 +87,12 @@ impl<'a> Game<'a> {
 
             let pxheight = (VISPLANE_DIST * height / cast_dist) as isize;
             let bottompx = h as isize/2 + (VISPLANE_DIST * person_height / cast_dist) as isize;
-            let toppx = bottompx - pxheight;
+            let toppx_ = bottompx - pxheight;
+            let toppx = if toppx_ >= h as isize { h as isize - 1 } else { toppx_ };
+
+            for y in 0..toppx {
+                put_px(pixels, w, x, y as usize, 0x00, 0x00, 0x00);
+            }
 
             if toppx > h as isize/2 {
                 let topfloor = if toppx >= h as isize { h as isize } else { toppx };
@@ -132,9 +137,9 @@ impl<'a> Game<'a> {
 
 
 fn put_px(pixels: &mut [u8], w: usize, x: usize, y: usize, r: u8, g: u8, b: u8) {
-    pixels[3*(w*y+x) + 0] = b;
+    pixels[3*(w*y+x) + 0] = r;
     pixels[3*(w*y+x) + 1] = g;
-    pixels[3*(w*y+x) + 2] = r;
+    pixels[3*(w*y+x) + 2] = b;
 }
 
 fn draw_seg(pixels: &mut [u8], w: usize, h: usize, seg: LineSeg, r: u8, g: u8, b: u8) {

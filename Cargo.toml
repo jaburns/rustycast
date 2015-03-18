@@ -9,11 +9,8 @@ authors = [
 name = "rustycast"
 path = "src/main.rs"
 
-[dependencies.sdl]
-path = "lib/rust-sdl"
-
-[dependencies.sdl_image]
-path = "lib/rust-sdl/src/sdl_image"
+[dependencies.sdl2]
+path = "lib/rust-sdl2"
 
 [dependencies]
 rand = "0.1.3"

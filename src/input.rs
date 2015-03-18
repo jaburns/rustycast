@@ -1,6 +1,6 @@
 
-use sdl::event;
-use sdl::event::{Event};
+use sdl2::event::Event;
+use sdl2::keycode::KeyCode;
 
 
 #[derive(Copy,Clone,PartialEq)]
@@ -18,14 +18,15 @@ pub struct InputState {
     _mouse_dx: f32,
 }
 
-fn map_sdl_key(key: event::Key) -> Option<Key> {
+
+fn map_sdl_key(key: KeyCode) -> Option<Key> {
     match key {
-        event::Key::W      => Some(Key::Forward),
-        event::Key::S      => Some(Key::Back),
-        event::Key::A      => Some(Key::Left),
-        event::Key::D      => Some(Key::Right),
-        event::Key::Tab    => Some(Key::ShowMap),
-        event::Key::Escape => Some(Key::Quit),
+        KeyCode::W      => Some(Key::Forward),
+        KeyCode::S      => Some(Key::Back),
+        KeyCode::A      => Some(Key::Left),
+        KeyCode::D      => Some(Key::Right),
+        KeyCode::Tab    => Some(Key::ShowMap),
+        KeyCode::Escape => Some(Key::Quit),
         _ => None
     }
 }
@@ -40,21 +41,25 @@ impl InputState {
 
     pub fn check_event(&mut self, event: &Event) {
         match *event {
-            Event::Key(key, down, _, _) => {
-                match map_sdl_key(key) {
+            Event::KeyDown { keycode, .. }  => {
+                match map_sdl_key(keycode) {
                     Some(key) => {
-                        if down {
-                            self._keys_down.push(key);
-                            self._keys_down.dedup();
-                        } else {
-                            self._keys_down.retain(|&k| k != key);
-                        }
+                        self._keys_down.push(key);
+                        self._keys_down.dedup();
                     }
                     None => {}
                 }
             }
-            Event::MouseMotion(_, _, _, dx, _) => {
-                self._mouse_dx = dx as f32;
+            Event::KeyUp { keycode, .. } => {
+                match map_sdl_key(keycode) {
+                    Some(key) => {
+                        self._keys_down.retain(|&k| k != key);
+                    }
+                    None => {}
+                }
+            }
+            Event::MouseMotion { xrel, .. } => {
+                self._mouse_dx = xrel as f32;
             }
             _ => {}
         }
