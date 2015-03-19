@@ -83,8 +83,7 @@ impl<'a> Game<'a> {
             let top = if toppx >= 0 { toppx as usize } else { 0 };
             let bottom = if bottompx < h as isize { bottompx as usize } else { h };
 
-            let brightness = (20.0 / cast_dist).min(1.0).max(0.0);
-
+            let brightness = brightness_from_dist(cast_dist);
 
             for y in top..bottom {
                 let yy = (bottompx as usize - y) as f32 / pxheight as f32 * height / 15.0;
@@ -93,27 +92,11 @@ impl<'a> Game<'a> {
                 ctx.put_px(x, y, color / 2, color / 2, color);
             }
 
-            for y in bottom..h {
-                let dist_floor = VISPLANE_DIST * person_height / ((y as f32) - (h as f32)/2.0);
-
-                let floor_pos = self.pos + (hit_pos-self.pos).normalize() * dist_floor / Float::cos(offset);
-
-                let tex_lookup = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
-
-                ctx.put_px(x, y, 0x00, tex_lookup, 0x00);
-            }
-
-            //for y in (h as isize/2)..topfloor {
-            //    let dist_floor = VISPLANE_DIST * (person_height - height) / ((y as f32) - (h as f32)/2.0);
-            //
-            //    let floor_pos = self.pos + (hit_pos - self.pos) * dist_floor / cast_dist;
-            //
-            //    let tex_lookup = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
-            //    put_px(pixels, w, x, y as usize, 0x00, tex_lookup, 0x00);
-            //}
+            ctx.draw_floor(x, bottom, h, person_height, self.pos, hit_pos, cast_dist);
         }
     }
 }
+
 
 impl<'a> RenderContext<'a> {
     pub fn put_px(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8) {
@@ -144,10 +127,19 @@ impl<'a> RenderContext<'a> {
         }
     }
 
-    pub fn draw_floor(pixels: &mut [u8], x: usize, top: usize, bottom: usize, elevation: f32) {
+    pub fn draw_floor(&mut self, x: usize, top: usize, bottom: usize, elevation: f32, pos: Vec2, hit_pos: Vec2, cast_dist: f32) {
         for y in top..bottom {
-            //put_px(pixels, w,
+            let dist_floor = VISPLANE_DIST * elevation / (y as f32 - self.height as f32 / 2.0);
+            let floor_pos = pos + (hit_pos - pos) * dist_floor / cast_dist;
+            let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
+            let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
+            self.put_px(x, y, 0x00, color, 0x00);
         }
     }
+}
+
+
+fn brightness_from_dist(dist: f32) -> f32 {
+    (20.0 / dist).min(1.0).max(0.0)
 }
 
