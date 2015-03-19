@@ -8,6 +8,7 @@ mod math;
 mod world;
 mod game;
 mod input;
+mod render;
 
 use std::time::Duration;
 use std::path::Path;
@@ -24,8 +25,8 @@ use sdl2::keycode::KeyCode;
 
 use std::rand;
 
-const WINDOW_WIDTH  :i32 = 320;
-const WINDOW_HEIGHT :i32 = 240;
+const WINDOW_WIDTH  :i32 = 3 * 320;
+const WINDOW_HEIGHT :i32 = 3 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
