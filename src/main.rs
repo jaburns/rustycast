@@ -12,6 +12,7 @@ mod render;
 
 use std::time::Duration;
 use std::path::Path;
+use std::old_io::timer;
 
 use time::PreciseTime;
 
@@ -23,13 +24,13 @@ use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2::keycode::KeyCode;
 
-use std::rand;
 
 const WINDOW_WIDTH  :i32 = 3 * 320;
 const WINDOW_HEIGHT :i32 = 3 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
+
 
 pub fn main() {
     let sdl_context = sdl2::init(sdl2::INIT_VIDEO).unwrap();
@@ -56,6 +57,7 @@ pub fn main() {
     let mut game = game::Game {
         pos: math::V2_ORIGIN,
         face_angle: 0.0,
+        look_angle: 0.0,
         world: &world::temp(),
         show_map: false,
         t: 0.0
@@ -84,7 +86,8 @@ pub fn main() {
         drawer.copy(&texture, None, Some(Rect::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)));
         drawer.present();
 
-        println!("{}", last_time.to(PreciseTime::now()).num_milliseconds());
+        let delta_time = last_time.to(PreciseTime::now()).num_milliseconds();
+        timer::sleep(Duration::milliseconds(15 - delta_time));
     }
 }
 

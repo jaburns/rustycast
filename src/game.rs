@@ -13,6 +13,7 @@ const TURN: f32 = 0.03;
 pub struct Game<'a> {
     pub pos: Vec2,
     pub face_angle: f32,
+    pub look_angle: f32,
     pub world: &'a World,
     pub show_map: bool,
     pub t: f32
@@ -22,6 +23,9 @@ pub struct Game<'a> {
 impl<'a> Game<'a> {
     pub fn step(&mut self, input: &InputState) {
         self.face_angle += input.mouse_dx() / 1000.0;
+        self.look_angle += input.mouse_dy() / 10.0;
+
+        self.look_angle = self.look_angle.min(120.0).max(-120.0);
 
         if input.has_key(Key::Forward) { self.do_move( 1.0,  0.0); }
         if input.has_key(Key::Back)    { self.do_move(-1.0,  0.0); }

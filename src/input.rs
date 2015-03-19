@@ -16,6 +16,7 @@ pub enum Key {
 pub struct InputState {
     _keys_down: Vec<Key>,
     _mouse_dx: f32,
+    _mouse_dy: f32,
 }
 
 
@@ -36,6 +37,7 @@ impl InputState {
         InputState {
             _keys_down: vec![],
             _mouse_dx: 0.0,
+            _mouse_dy: 0.0,
         }
     }
 
@@ -58,8 +60,9 @@ impl InputState {
                     None => {}
                 }
             }
-            Event::MouseMotion { xrel, .. } => {
+            Event::MouseMotion { xrel, yrel, .. } => {
                 self._mouse_dx = xrel as f32;
+                self._mouse_dy = yrel as f32;
             }
             _ => {}
         }
@@ -71,6 +74,9 @@ impl InputState {
 
     pub fn mouse_dx(&self) -> f32 {
         self._mouse_dx
+    }
+    pub fn mouse_dy(&self) -> f32 {
+        self._mouse_dy
     }
 
     pub fn has_key(&self, key: Key) -> bool {

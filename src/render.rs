@@ -49,12 +49,10 @@ impl<'a> Game<'a> {
     }
 
     fn render_game(&self, ctx: &mut RenderContext) {
-        let person_height = PERSON_HEIGHT; //+ Float::abs(Float::sin(self.t)) * 10.0;
-        let looking_offset = -(self.t * 10.0) as isize;
+        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t)) * 10.0;
+        let looking_offset = -self.look_angle as isize;
         let w = ctx.width as usize;
         let h = ctx.height as usize;
-
-        ctx.clear();
 
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
@@ -73,6 +71,12 @@ impl<'a> Game<'a> {
 
             let bottom = h as isize / 2 + (VISPLANE_DIST * person_height / cast_dist) as isize + looking_offset;
             let top = bottom - pxheight;
+
+            if top > 0 && top < ctx.height {
+                for y in 0..top as usize {
+                    ctx.put_px(x, y, 0, 0, 0);
+                }
+            }
 
             ctx.draw_wall(x, top, bottom, along, cast_dist);
             ctx.draw_floor(x, bottom, h as isize, person_height, self.pos, hit_pos, cast_dist, -looking_offset);
@@ -123,7 +127,7 @@ impl<'a> RenderContext<'a> {
     }
 
     pub fn draw_floor(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, cast_dist: f32, look: isize) {
-        let cut_top = if top < self.height / 2 { self.height / 2 } else { top } as usize;
+        let cut_top = if top < self.height / 2 - look { self.height / 2 - look } else { top } as usize;
         let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
 
         for y in cut_top..cut_bottom {
