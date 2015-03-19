@@ -31,7 +31,8 @@ pub struct RayCastResult {
     pub dist: f32,
     pub along: f32,
     pub hit_pos: Vec2,
-    pub info: SectorInfo,
+    pub in_info: SectorInfo,
+    pub out_info: Option<SectorInfo>,
 }
 
 
@@ -84,7 +85,8 @@ impl World {
                 dist: (pos - wall.seg.at(t)).get_length(),
                 along: wall.seg.get_length()*t,
                 hit_pos: wall.seg.at(t),
-                info: self._sectors[sector].info,
+                in_info: self._sectors[sector].info,
+                out_info: wall.portal.map(|(sec,wall)| self._sectors[sec].info),
             });
         }
     }
