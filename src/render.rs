@@ -22,20 +22,18 @@ impl<'a> Game<'a> {
 
     fn render_map(&self, pixels: &mut [u8], w: usize, h: usize) {
         let trans = Mat3::rotation(-self.face_angle)
-                  * Mat3::translation(-self.pos)
+                  * Mat3::translation(-self.pos * 2.0)
                   * Mat3::scale(Vec2::new(2.0, 2.0));
+
+        for x in 0..w {
+            for y in 0..h {
+                put_px(pixels, w ,x, y, 0x00, 0x00, 0x00);
+            }
+        }
+        put_px(pixels, w, w/2, h/2, 0xFF, 0x00, 0x00);
 
         for wall in self.world.get_walls().iter().map(|x| x.seg) {
             draw_seg(pixels, w, h, wall.transform(trans), 0xFF, 0x00, 0x00);
-        }
-
-        for x in 0..w {
-            let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-
-            self.world.cast_ray(self.pos, self.face_angle + offset).map(|RayCastResult {pos, ..}| {
-                let draw_sg = LineSeg::new(self.pos.x, self.pos.y, pos.x, pos.y);
-                draw_seg(pixels, w, h, draw_sg.transform(trans), 0x00, 0xFF, 0x00);
-            });
         }
     }
 
@@ -45,9 +43,10 @@ impl<'a> Game<'a> {
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
 
-            let cast = self.world.cast_ray(self.pos, self.face_angle + offset);
-            if !cast.is_some() { continue; }
-            let RayCastResult {dist, pos: hit_pos, along, height} = cast.unwrap();
+            let cast = self.world.cast_ray(0, self.pos, self.face_angle + offset);
+            if cast.is_empty() { continue; }
+            let RayCastResult {dist, along, hit_pos, info} = cast[0];
+            let height = 20.0;
 
             let cast_dist = dist * Float::cos(offset);
 
@@ -58,18 +57,6 @@ impl<'a> Game<'a> {
 
             for y in 0..toppx {
                 put_px(pixels, w, x, y as usize, 0x00, 0x00, 0x00);
-            }
-
-            if toppx > h as isize/2 {
-                let topfloor = if toppx >= h as isize { h as isize } else { toppx };
-                for y in (h as isize/2)..topfloor {
-                    let dist_floor = VISPLANE_DIST * (person_height - height) / ((y as f32) - (h as f32)/2.0);
-                    let brightness = (20.0 / dist_floor).min(1.0).max(0.0);
-                    let floor_pos = self.pos + (hit_pos - self.pos) * dist_floor / cast_dist;
-                    let tex_lookup = ((floor_pos.x * 10.0) as u8) ^ ((floor_pos.y * 10.0) as u8);
-                    let color = ((tex_lookup as f32) * brightness) as u8;
-                    put_px(pixels, w, x, y as usize, 0x00, color, 0x00);
-                }
             }
 
             if toppx >= h as isize || bottompx < 0 {

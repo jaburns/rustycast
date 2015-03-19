@@ -26,19 +26,70 @@ pub struct Wall {
     pub portal: Option<(usize,usize)>, // (sector index, wall index) for matching wall in another sector.
 }
 
+#[derive(Copy)]
 pub struct RayCastResult {
     pub dist: f32,
-    pub pos: Vec2,
     pub along: f32,
-    pub height: f32,
-}
-
-#[derive(Copy)]
-pub struct NewRayCastResult {
-    pub dist: f32,
-    pub along: f32,
+    pub hit_pos: Vec2,
     pub info: SectorInfo,
 }
+
+
+pub static W_ZERO: Wall = Wall {
+    seg: LineSeg {
+        a: Vec2 { x: 0.0, y: 0.0 },
+        b: Vec2 { x: 0.0, y: 0.0 },
+    },
+    portal: None
+};
+
+
+impl Wall {
+    pub fn new(x0: f32, y0: f32, x1: f32, y1: f32, portal: Option<(usize,usize)>) -> Wall {
+        Wall {
+            seg: LineSeg::new(x0, y0, x1, y1),
+            portal: portal,
+        }
+    }
+}
+
+
+impl World {
+    pub fn get_walls(&self) -> &[Wall] {
+        self._sectors[0].walls.as_slice()
+    }
+
+    pub fn cast_ray(&self, sector: usize, pos: Vec2, angle: f32) -> Vec<RayCastResult> {
+        let mut result = vec![];
+        self._cast_ray(sector, None, pos, angle, &mut result);
+        result
+    }
+
+    fn _cast_ray(&self, sector: usize, source_wall: Option<usize>, pos: Vec2, angle: f32, results: &mut Vec<RayCastResult>) {
+        let ray = LineSeg::new(
+            pos.x, pos.y,
+            pos.x + 1000.0*Float::sin(angle),
+            pos.y - 1000.0*Float::cos(angle)
+        );
+
+        let (d2, wall, t) = self._sectors[sector].walls.iter()
+            .filter_map(|&wall| ray.intersects_at(wall.seg).map(|t| (wall, t)))
+            .fold((f32::MAX, W_ZERO, 0.0), |(s_d2, s_wall, s_t), (wall, t)| {
+                let d2 = (pos - wall.seg.at(t)).get_length_sqr();
+                if d2 < s_d2 { (d2, wall, t) } else { (s_d2, s_wall, s_t) }
+            });
+
+        if d2 < f32::MAX {
+            results.push(RayCastResult {
+                dist: (pos - wall.seg.at(t)).get_length(),
+                along: wall.seg.get_length()*t,
+                hit_pos: wall.seg.at(t),
+                info: self._sectors[sector].info,
+            });
+        }
+    }
+}
+
 
 
 pub fn temp() -> World {
@@ -93,57 +144,3 @@ pub fn temp() -> World {
 }
 
 
-pub static W_ZERO: Wall = Wall {
-    seg: LineSeg {
-        a: Vec2 { x: 0.0, y: 0.0 },
-        b: Vec2 { x: 0.0, y: 0.0 },
-    },
-    portal: None
-};
-
-
-impl Wall {
-    pub fn new(x0: f32, y0: f32, x1: f32, y1: f32, portal: Option<(usize,usize)>) -> Wall {
-        Wall {
-            seg: LineSeg::new(x0, y0, x1, y1),
-            portal: portal,
-        }
-    }
-}
-
-
-impl World {
-    pub fn get_walls(&self) -> &[Wall] {
-        self._sectors[0].walls.as_slice()
-    }
-
-    pub fn cast_ray(&self, pos: Vec2, angle: f32) -> Option<RayCastResult> {
-        let ray = LineSeg::new(
-            pos.x, pos.y,
-            pos.x + 1000.0*Float::sin(angle),
-            pos.y - 1000.0*Float::cos(angle)
-        );
-
-        let (d2, wall, t) = self._sectors[0].walls.iter()
-            .filter_map(|&wall| ray.intersects_at(wall.seg).map(|t| (wall, t)))
-            .fold((f32::MAX, W_ZERO, 0.0), |(s_d2, s_wall, s_t), (wall, t)| {
-                let d2 = (pos - wall.seg.at(t)).get_length_sqr();
-                if d2 < s_d2 { (d2, wall, t) } else { (s_d2, s_wall, s_t) }
-            });
-
-        if d2 < f32::MAX {
-            Some(RayCastResult {
-                dist: (pos - wall.seg.at(t)).get_length(),
-                pos: wall.seg.at(t),
-                along: wall.seg.get_length()*t,
-                height: self._sectors[0].info.ceiling_elev
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn new_cast_ray(&self, pos: Vec2, angle: f32) -> Vec<NewRayCastResult> {
-        vec![]
-    }
-}

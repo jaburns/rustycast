@@ -6,7 +6,7 @@ use math::{Vec2};
 use input::{InputState, Key};
 
 
-const SPEED: f32 = 0.4;
+const SPEED: f32 = 0.2;
 const TURN: f32 = 0.03;
 
 
