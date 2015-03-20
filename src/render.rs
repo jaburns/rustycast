@@ -1,7 +1,7 @@
 
 use std::num::Float;
 
-use world::{World, RayCastResult};
+use world::{RayCastResult};
 use math::{LineSeg, Vec2, Mat3};
 use game::{Game};
 
@@ -49,7 +49,7 @@ impl<'a> Game<'a> {
     }
 
     fn render_game(&self, ctx: &mut RenderContext) {
-        let person_height = PERSON_HEIGHT + Float::abs(Float::sin(self.t)) * 10.0;
+        let person_height = PERSON_HEIGHT; //+ Float::abs(Float::sin(self.t * 3.0)) * 10.0;
         let looking_offset = -self.look_angle as isize;
         let w = ctx.width as usize;
         let h = ctx.height as usize;
@@ -81,6 +81,10 @@ impl<'a> Game<'a> {
             ctx.draw_wall(x, top, bottom, along, cast_dist);
             ctx.draw_floor(x, bottom, h as isize, person_height, self.pos, hit_pos, cast_dist, -looking_offset);
         }
+
+        ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);
+        ctx.draw_seg(LineSeg::new(-3.0, 0.0, 4.0, 0.0), 0xff, 0xff, 0xff);
+        ctx.put_px(160, 120, 0x00, 0x00, 0x00);
     }
 }
 

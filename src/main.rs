@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 #![feature(core)]
+#![feature(old_io)]
+#![feature(std_misc)]
 
 extern crate sdl2;
 extern crate time;
@@ -11,7 +13,6 @@ mod input;
 mod render;
 
 use std::time::Duration;
-use std::path::Path;
 use std::old_io::timer;
 
 use time::PreciseTime;
@@ -22,7 +23,6 @@ use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer};
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use sdl2::event::Event;
-use sdl2::keycode::KeyCode;
 
 
 const WINDOW_WIDTH  :i32 = 3 * 320;
@@ -74,12 +74,12 @@ pub fn main() {
             }
         }
 
-        if (inputs.has_key(input::Key::Quit)) {
+        if inputs.has_key(input::Key::Quit) {
             break 'main;
         }
 
         game.step(&inputs);
-        texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
+        texture.with_lock(None, |buffer, _| {
             game.render(buffer, W, H);
         }).unwrap();
 

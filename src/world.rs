@@ -2,7 +2,7 @@
 use std::f32;
 use std::num::Float;
 
-use math::{LineSeg, Vec2, V2_ORIGIN};
+use math::{LineSeg, Vec2};
 
 
 pub struct World {
@@ -86,7 +86,7 @@ impl World {
                 along: wall.seg.get_length()*t,
                 hit_pos: wall.seg.at(t),
                 in_info: self._sectors[sector].info,
-                out_info: wall.portal.map(|(sec,wall)| self._sectors[sec].info),
+                out_info: wall.portal.map(|(sec, _)| self._sectors[sec].info),
             });
         }
     }
@@ -107,14 +107,14 @@ pub fn temp() -> World {
                     Wall::new( 40.0, -40.0,  40.0,  40.0, None),
                     Wall::new( 40.0,  40.0, -40.0,  40.0, None),
                     Wall::new(-40.0,  40.0, -40.0, -40.0, None),
-                    Wall::new(-15.0, -15.0, -10.0, -15.0, Some((1,0))),
-                    Wall::new(-10.0, -15.0, -10.0, -10.0, Some((1,1))),
-                    Wall::new(-10.0, -10.0, -15.0, -10.0, Some((1,2))),
-                    Wall::new(-15.0, -10.0, -15.0, -15.0, Some((1,3))),
-                    Wall::new( 15.0,  15.0,  10.0,  15.0, Some((2,0))),
-                    Wall::new( 10.0,  15.0,  10.0,  10.0, Some((2,1))),
-                    Wall::new( 10.0,  10.0,  15.0,  10.0, Some((2,2))),
-                    Wall::new( 15.0,  10.0,  15.0,  15.0, Some((2,3)))
+                    Wall::new(-15.0, -15.0, -10.0, -15.0, None),//Some((1,0))),
+                    Wall::new(-10.0, -15.0, -10.0, -10.0, None),//Some((1,1))),
+                    Wall::new(-10.0, -10.0, -15.0, -10.0, None),//Some((1,2))),
+                    Wall::new(-15.0, -10.0, -15.0, -15.0, None),//Some((1,3))),
+                    Wall::new( 15.0,  15.0,  10.0,  15.0, None),//Some((2,0))),
+                    Wall::new( 10.0,  15.0,  10.0,  10.0, None),//Some((2,1))),
+                    Wall::new( 10.0,  10.0,  15.0,  10.0, None),//Some((2,2))),
+                    Wall::new( 15.0,  10.0,  15.0,  15.0, None),//Some((2,3)))
                 ]
             },
             Sector {

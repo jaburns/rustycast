@@ -6,7 +6,7 @@ use math::{Vec2};
 use input::{InputState, Key};
 
 
-const SPEED: f32 = 0.2;
+const SPEED: f32 = 0.3;
 const TURN: f32 = 0.03;
 
 
@@ -22,8 +22,8 @@ pub struct Game<'a> {
 
 impl<'a> Game<'a> {
     pub fn step(&mut self, input: &InputState) {
-        self.face_angle += input.mouse_dx() / 1000.0;
-        self.look_angle += input.mouse_dy() / 10.0;
+        self.face_angle += input.mouse_dx() / 500.0;
+        self.look_angle += input.mouse_dy() / 2.0;
 
         self.look_angle = self.look_angle.min(120.0).max(-120.0);
 
