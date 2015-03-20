@@ -59,32 +59,32 @@ impl<'a> Game<'a> {
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
 
-            let cast = self.world.cast_ray(0, self.pos, self.face_angle + offset);
-            if cast.is_empty() { continue; }
-            let RayCastResult {dist, along, hit_pos, in_info, out_info} = cast[0];
+            let mut render_bottom = h as isize;
 
-            let height = match out_info {
-                Some(i) => i.floor_elev - in_info.floor_elev,
-                None    => in_info.ceiling_elev - in_info.floor_elev,
-            };
+            for RayCastResult {along, hit_pos, in_info, out_info}
+            in self.world.cast_ray(0, self.pos, self.face_angle + offset) {
+                let dist = (hit_pos - self.pos).get_length();
 
-            let cast_dist = dist * Float::cos(offset);
-            let pxheight = (VISPLANE_DIST * height / cast_dist) as isize;
+                let wall_seg_height = match out_info {
+                    Some(i) => i.floor_elev - in_info.floor_elev,
+                    None    => in_info.ceiling_elev - in_info.floor_elev,
+                };
 
-            let bottom = h as isize / 2 + (VISPLANE_DIST * person_height / cast_dist) as isize + looking_offset;
-            let top = bottom - pxheight;
+                let cast_dist = dist * Float::cos(offset);
+                let pxheight = if wall_seg_height > 0.0 {
+                    (VISPLANE_DIST * wall_seg_height / cast_dist) as isize
+                } else {
+                    0
+                };
 
-            if top > 0 && top < ctx.height {
-                for y in 0..top as usize {
-                    sky.with_lock(|buffer| {
-                        let (r,g,b) = get_px(buffer, x, y, w);
-                        ctx.put_px(x, y, r, g, b);
-                    });
-                }
+                let wall_bottom = h as isize / 2 + looking_offset + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
+                let wall_top = wall_bottom - pxheight;
+
+                ctx.draw_wall(x, wall_top, wall_bottom, along, cast_dist);
+                ctx.draw_floor(x, wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
+
+                render_bottom = wall_top;
             }
-
-            ctx.draw_floor(x, bottom, h as isize, person_height, self.pos, hit_pos, cast_dist, -looking_offset);
-            ctx.draw_wall(x, top, bottom, along, cast_dist);
         }
 
         ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);
@@ -92,6 +92,19 @@ impl<'a> Game<'a> {
         ctx.put_px(160, 120, 0x00, 0x00, 0x00);
     }
 }
+
+/*
+
+   //  sky
+                if top > 0 && top < ctx.height {
+                    for y in 0..top as usize {
+                        sky.with_lock(|buffer| {
+                            let (r,g,b) = get_px(buffer, x, y, w);
+                            ctx.put_px(x, y, r, g, b);
+                        });
+                    }
+                }
+*/
 
 
 pub fn get_px(tex: &mut [u8], x: usize, y: usize, w: usize) -> (u8,u8,u8) {
@@ -139,13 +152,13 @@ impl<'a> RenderContext<'a> {
         }
     }
 
-    pub fn draw_floor(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, cast_dist: f32, look: isize) {
+    pub fn draw_floor(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
         let cut_top = if top < self.height / 2 - look { self.height / 2 - look } else { top } as usize;
         let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
 
         for y in cut_top..cut_bottom {
             let dist_floor = VISPLANE_DIST * elevation / ((y as isize + look) as f32 - self.height as f32 / 2.0);
-            let floor_pos = pos + (hit_pos - pos) * dist_floor / cast_dist;
+            let floor_pos = pos + (hit_pos - pos).normalize() * dist_floor / Float::cos(angle);
             let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
             let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
             self.put_px(x, y, 0x00, color, 0x00);

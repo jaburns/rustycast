@@ -28,7 +28,6 @@ pub struct Wall {
 
 #[derive(Copy)]
 pub struct RayCastResult {
-    pub dist: f32,
     pub along: f32,
     pub hit_pos: Vec2,
     pub in_info: SectorInfo,
@@ -94,7 +93,6 @@ impl World {
         if d2 == f32::MAX { return; }
 
         results.push(RayCastResult {
-            dist: (pos - wall.seg.at(t)).get_length(),
             along: wall.seg.get_length()*t,
             hit_pos: wall.seg.at(t),
             in_info: self._sectors[sector].info,
