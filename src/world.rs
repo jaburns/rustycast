@@ -90,25 +90,20 @@ impl World {
             pos.y - 1000.0*Float::cos(angle)
         );
 
-        let mut d2 = f32::MAX;
-        let mut wall = W_ZERO;
-        let mut t = 0.0;
-
-        for i in 0..self._sectors[sector].walls.len() {
-            if source_wall.is_some() && i == source_wall.unwrap() { continue; }
-            let wall_ = self._sectors[sector].walls[i];
-
-            ray.intersects_at(wall_.seg).map(|t_| {
-                let d2_ = (pos - wall_.seg.at(t_)).get_length_sqr();
-                if d2_ < d2 {
-                    d2 = d2_;
-                    wall = wall_;
-                    t = t_;
-                }
+        //Hopefully min_by will accept a compare function so we don't have to convert to int here
+        //to get a min on some floats.
+        //    https://github.com/rust-lang/rust/issues/15311
+        //
+        let closest_wall = self._sectors[sector].walls.iter().enumerate()
+            .filter(|&(i, wall)| source_wall.is_none() || i != source_wall.unwrap())
+            .filter_map(|(i, wall)| ray.intersects_at(wall.seg).map(|t| (wall, t)))
+            .min_by(|&(&wall, t)| {
+                ((pos - wall.seg.at(t)).get_length_sqr() * 100.0) as i32
             });
-        }
 
-        if d2 == f32::MAX { return; }
+        if closest_wall.is_none() { return; }
+
+        let (wall, t) = closest_wall.unwrap();
 
         results.push(RayCastResult {
             along: wall.seg.get_length()*t,
@@ -119,10 +114,10 @@ impl World {
 
         match wall.portal {
             Some((next_sector, next_wall)) => {
-                self._cast_ray(next_sector, Some(next_wall), wall.seg.at(t), angle, results);
+                self._cast_ray(next_sector, Some(next_wall), wall.seg.at(t), angle, results)
             }
             None => {}
-        }
+        };
     }
 }
 
