@@ -113,9 +113,8 @@ impl World {
         });
 
         match wall.portal {
-            Some((next_sector, next_wall)) => {
-                self._cast_ray(next_sector, Some(next_wall), wall.seg.at(t), angle, results)
-            }
+            Some((next_sector, next_wall)) =>
+                self._cast_ray(next_sector, Some(next_wall), wall.seg.at(t), angle, results),
             None => {}
         };
     }

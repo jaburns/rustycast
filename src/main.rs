@@ -15,6 +15,7 @@ mod render;
 
 use std::time::Duration;
 use std::old_io::timer;
+use std::os;
 
 use time::PreciseTime;
 
@@ -36,6 +37,7 @@ const H :usize = 240;
 
 pub fn main() {
     let sdl_context = sdl2::init(sdl2::INIT_VIDEO).unwrap();
+    let res_path = Path::new(format!("{}/../../res", os::self_exe_path().unwrap().as_str().unwrap()));
 
     let window = match Window::new("RustyCast", WindowPos::PosCentered, WindowPos::PosCentered, WINDOW_WIDTH, WINDOW_HEIGHT, OPENGL) {
         Ok(window) => window,
@@ -50,7 +52,7 @@ pub fn main() {
         Err(err) => panic!("failed to create renderer: {}", err)
     };
 
-    let mut sky = match LoadSurface::from_file(&Path::new("res/sky.png")) {
+    let mut sky = match LoadSurface::from_file(&res_path.join("sky.png")) {
         Ok(surface) => surface,
         Err(err) => panic!(format!("Failed to load png: {}", err))
     };
