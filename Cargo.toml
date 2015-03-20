@@ -10,8 +10,7 @@ name = "rustycast"
 path = "src/main.rs"
 
 [dependencies.sdl2]
-path = "lib/rust-sdl2"
+git = "https://github.com/AngryLawyer/rust-sdl2.git"
 
 [dependencies]
-rand = "0.1.3"
 time = "0.1.20"

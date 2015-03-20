@@ -2,8 +2,7 @@
 name = "rustycast"
 version = "0.0.1"
 dependencies = [
- "rand 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "sdl2 0.0.31",
+ "sdl2 0.0.31 (git+https://github.com/AngryLawyer/rust-sdl2.git)",
  "time 0.1.20 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -29,15 +28,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "rand"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "libc 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "log 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "rand"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
@@ -48,16 +38,18 @@ dependencies = [
 [[package]]
 name = "sdl2"
 version = "0.0.31"
+source = "git+https://github.com/AngryLawyer/rust-sdl2.git#2e0a39d29ed2deedccd9c89d9f08cec4191daab6"
 dependencies = [
  "bitflags 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sdl2-sys 0.0.31",
+ "sdl2-sys 0.0.31 (git+https://github.com/AngryLawyer/rust-sdl2.git)",
 ]
 
 [[package]]
 name = "sdl2-sys"
 version = "0.0.31"
+source = "git+https://github.com/AngryLawyer/rust-sdl2.git#2e0a39d29ed2deedccd9c89d9f08cec4191daab6"
 dependencies = [
  "libc 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
