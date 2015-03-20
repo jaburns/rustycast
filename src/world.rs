@@ -59,6 +59,24 @@ impl World {
         self._sectors[0].walls.as_slice()
     }
 
+    pub fn get_elevation(&self, sector: usize) -> f32 {
+        self._sectors[sector].info.floor_elev
+    }
+
+    // Returns (new position, new sector)
+    pub fn move_object(&self, sector: usize, old_pos: Vec2, new_pos: Vec2) -> usize {
+        let move_seg = LineSeg { a: old_pos, b: new_pos };
+
+        let crossed_portal = self._sectors[sector].walls.iter()
+            .filter_map(|&wall| move_seg.intersects_at(wall.seg).and(wall.portal))
+            .last();
+
+        match crossed_portal {
+            Some((new_sector, _)) => new_sector,
+            None => sector,
+        }
+    }
+
     pub fn cast_ray(&self, sector: usize, pos: Vec2, angle: f32) -> Vec<RayCastResult> {
         let mut result = vec![];
         self._cast_ray(sector, None, pos, angle, &mut result);
@@ -135,7 +153,7 @@ pub fn temp() -> World {
             },
             Sector {
                 info: SectorInfo {
-                    floor_elev: 5.0,
+                    floor_elev: 2.0,
                     ceiling_elev: 20.0,
                 },
                 walls: vec![

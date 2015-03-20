@@ -11,6 +11,7 @@ const TURN: f32 = 0.03;
 
 
 pub struct Game<'a> {
+    pub sector: usize,
     pub pos: Vec2,
     pub face_angle: f32,
     pub look_angle: f32,
@@ -39,7 +40,13 @@ impl<'a> Game<'a> {
     fn do_move(&mut self, para: f32, perp: f32) {
         let sin = SPEED*Float::sin(self.face_angle);
         let cos = SPEED*Float::cos(self.face_angle);
-        self.pos.x +=  sin*para + cos*perp;
-        self.pos.y += -cos*para + sin*perp;
+
+        let new_pos = self.pos + Vec2::new(
+             sin*para + cos*perp,
+            -cos*para + sin*perp
+        );
+
+        self.sector = self.world.move_object(self.sector, self.pos, new_pos);
+        self.pos = new_pos;
     }
 }

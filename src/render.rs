@@ -51,7 +51,7 @@ impl<'a> Game<'a> {
     }
 
     fn render_game(&self, sky: &mut Surface, ctx: &mut RenderContext) {
-        let person_height = PERSON_HEIGHT + 5.0; //+ Float::abs(Float::sin(self.t * 3.0)) * 10.0;
+        let person_height = PERSON_HEIGHT + self.world.get_elevation(self.sector); //+ Float::abs(Float::sin(self.t * 3.0)) * 10.0;
         let looking_offset = -self.look_angle as isize;
         let w = ctx.width as usize;
         let h = ctx.height as usize;
@@ -62,7 +62,7 @@ impl<'a> Game<'a> {
             let mut render_bottom = h as isize;
 
             for RayCastResult {along, hit_pos, in_info, out_info}
-            in self.world.cast_ray(0, self.pos, self.face_angle + offset) {
+            in self.world.cast_ray(self.sector, self.pos, self.face_angle + offset) {
                 let dist = (hit_pos - self.pos).get_length();
 
                 let wall_seg_height = match out_info {
