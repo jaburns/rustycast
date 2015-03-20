@@ -89,6 +89,15 @@ impl<'a> Game<'a> {
 
                 render_bottom = wall_top;
             }
+
+            if render_bottom > 0 {
+                for y in 0..render_bottom as usize {
+                    sky.with_lock(|buffer| {
+                        let (r,g,b) = get_px(buffer, x, y, w);
+                        ctx.put_px(x, y, r, g, b);
+                    });
+                }
+            }
         }
 
         ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);
@@ -96,19 +105,6 @@ impl<'a> Game<'a> {
         ctx.put_px(160, 120, 0x00, 0x00, 0x00);
     }
 }
-
-/*
-
-   //  sky
-                if top > 0 && top < ctx.height {
-                    for y in 0..top as usize {
-                        sky.with_lock(|buffer| {
-                            let (r,g,b) = get_px(buffer, x, y, w);
-                            ctx.put_px(x, y, r, g, b);
-                        });
-                    }
-                }
-*/
 
 
 pub fn get_px(tex: &mut [u8], x: usize, y: usize, w: usize) -> (u8,u8,u8) {
