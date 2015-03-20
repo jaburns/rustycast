@@ -52,7 +52,7 @@ impl<'a> Game<'a> {
 
     fn render_game(&self, sky: &mut Surface, ctx: &mut RenderContext) {
         let person_height = PERSON_HEIGHT + 5.0; //+ Float::abs(Float::sin(self.t * 3.0)) * 10.0;
-        let looking_offset = 0; //-self.look_angle as isize;
+        let looking_offset = -self.look_angle as isize;
         let w = ctx.width as usize;
         let h = ctx.height as usize;
 
@@ -85,9 +85,6 @@ impl<'a> Game<'a> {
 
             ctx.draw_floor(x, bottom, h as isize, person_height, self.pos, hit_pos, cast_dist, -looking_offset);
             ctx.draw_wall(x, top, bottom, along, cast_dist);
-
-            // Next floor:
-            //ctx.draw_floor(x, h as isize / 2 + looking_offset, top, person_height - height, self.pos, hit_pos, cast_dist, -looking_offset);
         }
 
         ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);

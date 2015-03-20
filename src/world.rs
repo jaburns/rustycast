@@ -73,21 +73,39 @@ impl World {
             pos.y - 1000.0*Float::cos(angle)
         );
 
-        let (d2, wall, t) = self._sectors[sector].walls.iter()
-            .filter_map(|&wall| ray.intersects_at(wall.seg).map(|t| (wall, t)))
-            .fold((f32::MAX, W_ZERO, 0.0), |(s_d2, s_wall, s_t), (wall, t)| {
-                let d2 = (pos - wall.seg.at(t)).get_length_sqr();
-                if d2 < s_d2 { (d2, wall, t) } else { (s_d2, s_wall, s_t) }
-            });
+        let mut d2 = f32::MAX;
+        let mut wall = W_ZERO;
+        let mut t = 0.0;
 
-        if d2 < f32::MAX {
-            results.push(RayCastResult {
-                dist: (pos - wall.seg.at(t)).get_length(),
-                along: wall.seg.get_length()*t,
-                hit_pos: wall.seg.at(t),
-                in_info: self._sectors[sector].info,
-                out_info: wall.portal.map(|(sec, _)| self._sectors[sec].info),
+        for i in 0..self._sectors[sector].walls.len() {
+            if source_wall.is_some() && i == source_wall.unwrap() { continue; }
+            let wall_ = self._sectors[sector].walls[i];
+
+            ray.intersects_at(wall_.seg).map(|t_| {
+                let d2_ = (pos - wall_.seg.at(t_)).get_length_sqr();
+                if d2_ < d2 {
+                    d2 = d2_;
+                    wall = wall_;
+                    t = t_;
+                }
             });
+        }
+
+        if d2 == f32::MAX { return; }
+
+        results.push(RayCastResult {
+            dist: (pos - wall.seg.at(t)).get_length(),
+            along: wall.seg.get_length()*t,
+            hit_pos: wall.seg.at(t),
+            in_info: self._sectors[sector].info,
+            out_info: wall.portal.map(|(sec, _)| self._sectors[sec].info),
+        });
+
+        match wall.portal {
+            Some((next_sector, next_wall)) => {
+                self._cast_ray(next_sector, Some(next_wall), wall.seg.at(t), angle, results);
+            }
+            None => {}
         }
     }
 }
