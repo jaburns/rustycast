@@ -147,14 +147,14 @@ pub fn temp() -> World {
             },
             Sector {
                 info: SectorInfo {
-                    floor_elev: 5.0,
+                    floor_elev: 2.0,
                     ceiling_elev: 20.0,
                 },
                 walls: vec![
-                    Wall::new(-15.0, -15.0, -10.0, -15.0, Some((0,8))),
-                    Wall::new(-10.0, -15.0, -10.0, -10.0, Some((0,9))),
-                    Wall::new(-10.0, -10.0, -15.0, -10.0, Some((0,10))),
-                    Wall::new(-15.0, -10.0, -15.0, -15.0, Some((0,11))),
+                    Wall::new( 15.0,  15.0,  10.0,  15.0, Some((0,8))),
+                    Wall::new( 10.0,  15.0,  10.0,  10.0, Some((0,9))),
+                    Wall::new( 10.0,  10.0,  15.0,  10.0, Some((0,10))),
+                    Wall::new( 15.0,  10.0,  15.0,  15.0, Some((0,11)))
                 ]
             }
         ]

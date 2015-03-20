@@ -80,8 +80,12 @@ impl<'a> Game<'a> {
                 let wall_bottom = h as isize / 2 + looking_offset + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
                 let wall_top = wall_bottom - pxheight;
 
-                ctx.draw_wall(x, wall_top, wall_bottom, along, cast_dist);
-                ctx.draw_floor(x, wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
+                let mut wall_offset_bottom = wall_bottom - render_bottom;
+                if wall_offset_bottom < 0 { wall_offset_bottom = 0; }
+                let draw_wall_bottom = if wall_bottom > render_bottom { render_bottom } else { wall_bottom };
+
+                ctx.draw_wall(x, wall_top, draw_wall_bottom, wall_offset_bottom, along, cast_dist);
+                ctx.draw_floor(x, draw_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
 
                 render_bottom = wall_top;
             }
@@ -140,12 +144,12 @@ impl<'a> RenderContext<'a> {
         }
     }
 
-    pub fn draw_wall(&mut self, x: usize, top: isize, bottom: isize, along:f32, cast_dist: f32) {
+    pub fn draw_wall(&mut self, x: usize, top: isize, bottom: isize, y_offset: isize, along:f32, cast_dist: f32) {
         let cut_top = if top < 0 { 0 } else { top } as usize;
         let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
 
         for y in cut_top..cut_bottom {
-            let yy = (bottom as usize - y) as f32 * cast_dist / 5000.0;
+            let yy = ((bottom + y_offset) as usize - y) as f32 * cast_dist / 5000.0;
             let tex_lookup = (along * 25.0) as u8 ^ (512.0*yy) as u8;
             let color = ((tex_lookup as f32) * brightness_from_dist(cast_dist)) as u8;
             self.put_px(x, y, color / 2, color / 2, color);
