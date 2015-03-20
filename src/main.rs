@@ -4,6 +4,7 @@
 #![feature(std_misc)]
 
 extern crate sdl2;
+extern crate sdl2_image;
 extern crate time;
 
 mod math;
@@ -23,6 +24,7 @@ use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer};
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use sdl2::event::Event;
+use sdl2_image::LoadSurface;
 
 
 const WINDOW_WIDTH  :i32 = 3 * 320;
@@ -46,6 +48,11 @@ pub fn main() {
     let renderer = match Renderer::from_window(window, RenderDriverIndex::Auto, ACCELERATED) {
         Ok(renderer) => renderer,
         Err(err) => panic!("failed to create renderer: {}", err)
+    };
+
+    let mut sky = match LoadSurface::from_file(&Path::new("res/sky.png")) {
+        Ok(surface) => surface,
+        Err(err) => panic!(format!("Failed to load png: {}", err))
     };
 
     let mut texture = renderer.create_texture_streaming(PixelFormatEnum::RGB24, (W as i32, H as i32)).unwrap();
@@ -80,10 +87,11 @@ pub fn main() {
 
         game.step(&inputs);
         texture.with_lock(None, |buffer, _| {
-            game.render(buffer, W, H);
+            game.render(&mut sky, buffer, W, H);
         }).unwrap();
 
-        drawer.copy(&texture, None, Some(Rect::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)));
+        drawer.clear();
+        drawer.copy(&texture, None, None);
         drawer.present();
 
         let delta_time = last_time.to(PreciseTime::now()).num_milliseconds();

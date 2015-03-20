@@ -1,6 +1,8 @@
 
 use std::num::Float;
 
+use sdl2::surface::Surface;
+
 use world::{RayCastResult};
 use math::{LineSeg, Vec2, Mat3};
 use game::{Game};
@@ -20,7 +22,7 @@ struct RenderContext<'a> {
 
 
 impl<'a> Game<'a> {
-    pub fn render(&self, pixels: &mut [u8], w :usize, h: usize) {
+    pub fn render(&self, sky: &mut Surface, pixels: &mut [u8], w :usize, h: usize) {
         let mut ctx = RenderContext {
             pixels: pixels,
             width: w as isize,
@@ -30,7 +32,7 @@ impl<'a> Game<'a> {
         if self.show_map {
             self.render_map(&mut ctx);
         } else {
-            self.render_game(&mut ctx);
+            self.render_game(sky, &mut ctx);
         }
     }
 
@@ -48,9 +50,9 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn render_game(&self, ctx: &mut RenderContext) {
-        let person_height = PERSON_HEIGHT; //+ Float::abs(Float::sin(self.t * 3.0)) * 10.0;
-        let looking_offset = -self.look_angle as isize;
+    fn render_game(&self, sky: &mut Surface, ctx: &mut RenderContext) {
+        let person_height = PERSON_HEIGHT + 5.0; //+ Float::abs(Float::sin(self.t * 3.0)) * 10.0;
+        let looking_offset = 0; //-self.look_angle as isize;
         let w = ctx.width as usize;
         let h = ctx.height as usize;
 
@@ -74,12 +76,18 @@ impl<'a> Game<'a> {
 
             if top > 0 && top < ctx.height {
                 for y in 0..top as usize {
-                    ctx.put_px(x, y, 0, 0, 0);
+                    sky.with_lock(|buffer| {
+                        let (r,g,b) = get_px(buffer, x, y, w);
+                        ctx.put_px(x, y, r, g, b);
+                    });
                 }
             }
 
-            ctx.draw_wall(x, top, bottom, along, cast_dist);
             ctx.draw_floor(x, bottom, h as isize, person_height, self.pos, hit_pos, cast_dist, -looking_offset);
+            ctx.draw_wall(x, top, bottom, along, cast_dist);
+
+            // Next floor:
+            //ctx.draw_floor(x, h as isize / 2 + looking_offset, top, person_height - height, self.pos, hit_pos, cast_dist, -looking_offset);
         }
 
         ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);
@@ -88,6 +96,10 @@ impl<'a> Game<'a> {
     }
 }
 
+
+pub fn get_px(tex: &mut [u8], x: usize, y: usize, w: usize) -> (u8,u8,u8) {
+    (tex[3*(w*y+x)+0], tex[3*(w*y+x)+1], tex[3*(w*y+x)+2])
+}
 
 impl<'a> RenderContext<'a> {
     pub fn put_px(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8) {
