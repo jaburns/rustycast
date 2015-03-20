@@ -9,8 +9,10 @@ authors = [
 name = "rustycast"
 path = "src/main.rs"
 
-[dependencies.sdl2]
-git = "https://github.com/AngryLawyer/rust-sdl2.git"
-
 [dependencies]
-time = "0.1.20"
+sdl2 = "*"
+sdl2-sys = "*"
+time = "*"
+
+[dependencies.sdl2_image]
+git = "https://github.com/jaburns/rust-sdl2_image"
