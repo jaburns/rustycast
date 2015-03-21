@@ -1,5 +1,4 @@
 
-use std::f32;
 use std::num::Float;
 
 use math::{LineSeg, Vec2};
@@ -95,8 +94,8 @@ impl World {
         //    https://github.com/rust-lang/rust/issues/15311
         //
         let closest_wall = self._sectors[sector].walls.iter().enumerate()
-            .filter(|&(i, wall)| source_wall.is_none() || i != source_wall.unwrap())
-            .filter_map(|(i, wall)| ray.intersects_at(wall.seg).map(|t| (wall, t)))
+            .filter(|&(i, _)| source_wall.is_none() || i != source_wall.unwrap())
+            .filter_map(|(_, wall)| ray.intersects_at(wall.seg).map(|t| (wall, t)))
             .min_by(|&(&wall, t)| {
                 ((pos - wall.seg.at(t)).get_length_sqr() * 100.0) as i32
             });

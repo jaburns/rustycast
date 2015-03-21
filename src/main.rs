@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 #![feature(core)]
 #![feature(old_io)]
+#![feature(old_path)]
+#![feature(os)]
 #![feature(std_misc)]
 
 extern crate sdl2;
@@ -23,13 +25,12 @@ use sdl2::video::{Window, WindowPos, OPENGL};
 use sdl2::mouse;
 use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer};
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :i32 = 1 * 320;
-const WINDOW_HEIGHT :i32 = 1 * 240;
+const WINDOW_WIDTH  :i32 = 3 * 320;
+const WINDOW_HEIGHT :i32 = 3 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
