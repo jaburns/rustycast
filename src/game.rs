@@ -1,7 +1,7 @@
 
 use std::num::Float;
 
-use world::{World};
+use world::{World, SectorIndex};
 use math::{Vec2};
 use input::{InputState, Key};
 
@@ -11,7 +11,7 @@ const TURN: f32 = 0.03;
 
 
 pub struct Game<'a> {
-    pub sector: usize,
+    pub sector: SectorIndex,
     pub pos: Vec2,
     pub face_angle: f32,
     pub look_angle: f32,

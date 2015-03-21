@@ -187,7 +187,7 @@ impl LineSeg {
         }
     }
 
-    pub fn intersects_at(self, rhs: LineSeg) -> Option<f32> {
+    pub fn intersects(self, rhs: LineSeg) -> Option<f32> {
         let dx1x3 = self.a.x-rhs.a.x;
         let dy1y3 = self.a.y-rhs.a.y;
         let dx2x1 = self.b.x-self.a.x;

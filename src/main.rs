@@ -65,7 +65,7 @@ pub fn main() {
 
     let mut inputs = input::InputState::new();
     let mut game = game::Game {
-        sector: 0,
+        sector: world::SectorIndex(0),
         pos: math::V2_ORIGIN,
         face_angle: 0.0,
         look_angle: 0.0,
