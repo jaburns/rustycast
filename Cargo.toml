@@ -11,8 +11,5 @@ path = "src/main.rs"
 
 [dependencies]
 sdl2 = "*"
-sdl2-sys = "*"
+sdl2_image = "*"
 time = "*"
-
-[dependencies.sdl2_image]
-git = "https://github.com/jaburns/rust-sdl2_image"
