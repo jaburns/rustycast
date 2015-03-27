@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![feature(core)]
-#![feature(old_io)]
-#![feature(std_misc)]
+#![feature(std_misc)] // Used for std::time::Duration
+#![feature(thread_sleep)]
 
 extern crate sdl2;
 extern crate sdl2_image;
@@ -14,7 +14,7 @@ mod input;
 mod render;
 
 use std::time::Duration;
-use std::old_io::timer;
+use std::thread;
 use std::path::Path;
 
 use time::PreciseTime;
@@ -27,8 +27,8 @@ use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :i32 = 3 * 320;
-const WINDOW_HEIGHT :i32 = 3 * 240;
+const WINDOW_WIDTH  :i32 = 1 * 320;
+const WINDOW_HEIGHT :i32 = 1 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
@@ -98,7 +98,7 @@ pub fn main() {
         drawer.present();
 
         let delta_time = last_time.to(PreciseTime::now()).num_milliseconds();
-        timer::sleep(Duration::milliseconds(15 - delta_time));
+        thread::sleep(Duration::milliseconds(15 - delta_time));
     }
 }
 
