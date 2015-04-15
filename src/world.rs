@@ -13,25 +13,25 @@ pub struct Sector {
     pub walls: Vec<Wall>,
 }
 
-#[derive(Copy)]
+#[derive(Clone,Copy)]
 pub struct SectorInfo {
     pub floor_elev: f32,
     pub ceiling_elev: f32,
 }
 
-#[derive(Copy,PartialEq)]
+#[derive(Clone,Copy,PartialEq)]
 pub struct SectorIndex(pub usize);
 
-#[derive(Copy,PartialEq)]
+#[derive(Clone,Copy,PartialEq)]
 pub struct WallIndex(pub usize);
 
-#[derive(Copy)]
+#[derive(Clone,Copy)]
 pub struct Wall {
     pub seg: LineSeg,
     pub portal: Option<(SectorIndex,WallIndex)>,
 }
 
-#[derive(Copy)]
+#[derive(Clone,Copy)]
 pub struct RayCastResult {
     pub along: f32,
     pub hit_pos: Vec2,

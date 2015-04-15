@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 #![feature(core)]
+#![feature(convert)] // Used for as_slice
 #![feature(std_misc)] // Used for std::time::Duration
 #![feature(thread_sleep)]
 
@@ -27,8 +28,8 @@ use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :i32 = 3 * 320;
-const WINDOW_HEIGHT :i32 = 3 * 240;
+const WINDOW_WIDTH  :i32 = 1 * 320;
+const WINDOW_HEIGHT :i32 = 1 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
@@ -39,15 +40,15 @@ pub fn main() {
 
     let res_path = Path::new("/Users/jaburns/dev/rustycast/res");
 
-    let window = match Window::new("RustyCast", WindowPos::PosCentered, WindowPos::PosCentered, WINDOW_WIDTH, WINDOW_HEIGHT, OPENGL) {
+    let window = match Window::new(&sdl_context, "RustyCast", WindowPos::PosCentered, WindowPos::PosCentered, WINDOW_WIDTH, WINDOW_HEIGHT, OPENGL) {
         Ok(window) => window,
         Err(err) => panic!("failed to create window: {}", err)
     };
 
-    window.set_grab(true);
+    //window.set_grab(true);
     mouse::set_relative_mouse_mode(true);
 
-    let renderer = match Renderer::from_window(window, RenderDriverIndex::Auto, ACCELERATED) {
+    let mut renderer = match Renderer::from_window(window, RenderDriverIndex::Auto, ACCELERATED) {
         Ok(renderer) => renderer,
         Err(err) => panic!("failed to create renderer: {}", err)
     };

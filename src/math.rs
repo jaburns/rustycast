@@ -3,20 +3,20 @@ use std::num::Float;
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
 
-#[derive(Copy)]
+#[derive(Clone,Copy)]
 pub struct Vec2 {
     pub x: f32,
     pub y: f32,
 }
 
-#[derive(Copy)]
+#[derive(Clone,Copy)]
 pub struct Mat3 {
     pub a00: f32, pub a01: f32, pub a02: f32,
     pub a10: f32, pub a11: f32, pub a12: f32,
     pub a20: f32, pub a21: f32, pub a22: f32,
 }
 
-#[derive(Copy)]
+#[derive(Clone,Copy)]
 pub struct LineSeg {
     pub a: Vec2,
     pub b: Vec2,
