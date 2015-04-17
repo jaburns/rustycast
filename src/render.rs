@@ -107,8 +107,8 @@ impl<'a> Game<'a> {
 
                 ctx.draw_wall(x, draw_ceiling_wall_top, draw_ceiling_wall_bottom, 0, along, cast_dist);
 
-                ctx.draw_floor(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
-                ctx.draw_ceiling(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, offset, -looking_offset);
+                ctx.draw_flat(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
+                ctx.draw_flat(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, offset, -looking_offset);
 
                 render_top = ceiling_wall_bottom;
                 render_bottom = floor_wall_top;
@@ -179,10 +179,10 @@ impl<'a> RenderContext<'a> {
         }
     }
 
-    pub fn draw_floor(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
+    pub fn draw_flat(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
         if bottom < 0 || top >= self.height { return; }
 
-        let cut_top = if top < self.height / 2 - look { self.height / 2 - look } else { top } as usize;
+        let cut_top = if top < 0 { 0 } else { top } as usize;
         let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
 
         for y in cut_top..cut_bottom {
@@ -191,21 +191,6 @@ impl<'a> RenderContext<'a> {
             let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
             let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
             self.put_px(x, y, 0x00, color, 0x00);
-        }
-    }
-
-    pub fn draw_ceiling(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
-        if bottom < 0 || top >= self.height { return; }
-
-        let cut_top = if top < 0 { 0 } else { top } as usize;
-        let cut_bottom = if bottom > self.height / 2 - look { self.height / 2 - look } else { bottom } as usize;
-
-        for y in cut_top..cut_bottom {
-            let dist_floor = VISPLANE_DIST * elevation / ((y as isize + look) as f32 - self.height as f32 / 2.0);
-            let floor_pos = pos + (hit_pos - pos).normalize() * dist_floor / Float::cos(angle);
-            let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
-            let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
-            self.put_px(x, y, color, 0x00, 0x00);
         }
     }
 }
