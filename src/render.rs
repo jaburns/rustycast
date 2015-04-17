@@ -109,21 +109,16 @@ impl<'a> Game<'a> {
                 ctx.draw_wall(x, draw_ceiling_wall_top, draw_ceiling_wall_bottom, 0, along, cast_dist);
 
                 ctx.draw_flat(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, cos_offset, -looking_offset);
-                ctx.draw_flat(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, cos_offset, -looking_offset);
+
+                if in_info.ceiling_elev > 22.0 {
+                    ctx.draw_sky(sky, x, render_top, draw_ceiling_wall_top);
+                } else {
+                    ctx.draw_flat(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, cos_offset, -looking_offset);
+                }
 
                 render_top = ceiling_wall_bottom;
                 render_bottom = floor_wall_top;
             }
-
-            // SKY
-             // if render_bottom > 0 {
-             //     for y in 0..render_bottom as usize {
-             //         sky.with_lock(|buffer| {
-             //             let (r,g,b) = get_px(buffer, x, y, w);
-             //             ctx.put_px(x, y, r, g, b);
-             //         });
-             //     }
-             // }
         }
 
         ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);
@@ -192,6 +187,20 @@ impl<'a> RenderContext<'a> {
             let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
             let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
             self.put_px(x, y, 0x00, color, 0x00);
+        }
+    }
+
+    pub fn draw_sky(&mut self, sky: &mut Surface, x: usize, top: isize, bottom: isize) {
+        if bottom < 0 || top >= self.height { return; }
+
+        let cut_top = if top < 0 { 0 } else { top } as usize;
+        let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
+
+        for y in cut_top..cut_bottom {
+            sky.with_lock(|buffer| {
+                let (r,g,b) = get_px(buffer, x, y, self.width as usize);
+                self.put_px(x, y, r, g, b);
+            });
         }
     }
 }

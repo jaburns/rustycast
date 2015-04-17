@@ -146,8 +146,8 @@ pub fn temp() -> World {
                     Wall::new( 40.0,  40.0, -40.0,  40.0, None),
                     Wall::new(-40.0,  40.0, -40.0, -40.0, None),
                     Wall::new(-25.0, -25.0, -10.0, -25.0, Some((SectorIndex(1),WallIndex(0)))),
-                    Wall::new(-10.0, -25.0, -10.0, -10.0, Some((SectorIndex(1),WallIndex(1)))),
-                    Wall::new(-10.0, -10.0, -25.0, -10.0, Some((SectorIndex(1),WallIndex(2)))),
+                    Wall::new(-10.0, -25.0, -10.0,  -1.0, Some((SectorIndex(1),WallIndex(1)))),
+                    Wall::new(-10.0,  -1.0, -25.0, -10.0, Some((SectorIndex(1),WallIndex(2)))),
                     Wall::new(-25.0, -10.0, -25.0, -25.0, Some((SectorIndex(1),WallIndex(3)))),
                     Wall::new( 25.0,  25.0,  10.0,  25.0, Some((SectorIndex(2),WallIndex(0)))),
                     Wall::new( 10.0,  25.0,  10.0,  10.0, Some((SectorIndex(2),WallIndex(1)))),
@@ -158,12 +158,12 @@ pub fn temp() -> World {
             Sector {
                 info: SectorInfo {
                     floor_elev: 2.0,
-                    ceiling_elev: 30.0,
+                    ceiling_elev: 23.0,
                 },
                 walls: vec![
                     Wall::new(-25.0, -25.0, -10.0, -25.0, Some((SectorIndex(0),WallIndex(4)))),
-                    Wall::new(-10.0, -25.0, -10.0, -10.0, Some((SectorIndex(0),WallIndex(5)))),
-                    Wall::new(-10.0, -10.0, -25.0, -10.0, Some((SectorIndex(0),WallIndex(6)))),
+                    Wall::new(-10.0, -25.0, -10.0,  -1.0, Some((SectorIndex(0),WallIndex(5)))),
+                    Wall::new(-10.0,  -1.0, -25.0, -10.0, Some((SectorIndex(0),WallIndex(6)))),
                     Wall::new(-25.0, -10.0, -25.0, -25.0, Some((SectorIndex(0),WallIndex(7)))),
                 ]
             },
