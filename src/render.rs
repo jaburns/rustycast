@@ -60,44 +60,69 @@ impl<'a> Game<'a> {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
 
             let mut render_bottom = h as isize;
+            let mut render_top = 0;
 
             for RayCastResult {along, hit_pos, in_info, out_info}
             in self.world.cast_ray(self.sector, self.pos, self.face_angle + offset) {
                 let dist = (hit_pos - self.pos).get_length();
+                let cast_dist = dist * Float::cos(offset);
 
-                let wall_seg_height = match out_info {
+                let floor_wall_seg_height = match out_info {
                     Some(i) => i.floor_elev - in_info.floor_elev,
                     None    => in_info.ceiling_elev - in_info.floor_elev,
                 };
-
-                let cast_dist = dist * Float::cos(offset);
-                let pxheight = if wall_seg_height > 0.0 {
-                    (VISPLANE_DIST * wall_seg_height / cast_dist) as isize
+                let floor_wall_seg_height_px = if floor_wall_seg_height > 0.0 {
+                    (VISPLANE_DIST * floor_wall_seg_height / cast_dist) as isize
                 } else {
                     0
                 };
 
-                let wall_bottom = h as isize / 2 + looking_offset + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
-                let wall_top = wall_bottom - pxheight;
+                let ceiling_wall_seg_height = match out_info {
+                    Some(i) => in_info.ceiling_elev - i.ceiling_elev,
+                    None    => 0.0
+                };
+                let ceiling_wall_seg_height_px = if ceiling_wall_seg_height > 0.0 {
+                    (VISPLANE_DIST * ceiling_wall_seg_height / cast_dist) as isize
+                } else {
+                    0
+                };
 
-                let mut wall_offset_bottom = wall_bottom - render_bottom;
-                if wall_offset_bottom < 0 { wall_offset_bottom = 0; }
-                let draw_wall_bottom = if wall_bottom > render_bottom { render_bottom } else { wall_bottom };
+                let middle = (h as isize / 2 + looking_offset);
 
-                ctx.draw_wall(x, wall_top, draw_wall_bottom, wall_offset_bottom, along, cast_dist);
-                ctx.draw_floor(x, draw_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
+                let floor_wall_bottom = middle + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
+                let floor_wall_top = floor_wall_bottom - floor_wall_seg_height_px;
+                let floor_wall_offset_bottom = if floor_wall_bottom > render_bottom { floor_wall_bottom - render_bottom } else { 0 };
 
-                render_bottom = wall_top;
+                let draw_floor_wall_top = if floor_wall_top < render_top { render_top } else { floor_wall_top };
+                let draw_floor_wall_bottom = if floor_wall_bottom > render_bottom { render_bottom } else { floor_wall_bottom };
+
+                ctx.draw_wall(x, draw_floor_wall_top, draw_floor_wall_bottom, floor_wall_offset_bottom, along, cast_dist);
+
+
+                let ceiling_wall_top = middle + (VISPLANE_DIST * (person_height - in_info.ceiling_elev) / cast_dist) as isize;
+                let ceiling_wall_bottom = ceiling_wall_top + ceiling_wall_seg_height_px;
+
+                let draw_ceiling_wall_top = if ceiling_wall_top < render_top { render_top } else { ceiling_wall_top };
+                let draw_ceiling_wall_bottom = if ceiling_wall_bottom > render_bottom { render_bottom } else { ceiling_wall_bottom };
+
+                ctx.draw_wall(x, draw_ceiling_wall_top, draw_ceiling_wall_bottom, 0, along, cast_dist);
+
+                ctx.draw_floor(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
+                ctx.draw_ceiling(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, offset, -looking_offset);
+
+                render_top = ceiling_wall_bottom;
+                render_bottom = floor_wall_top;
             }
 
-            if render_bottom > 0 {
-                for y in 0..render_bottom as usize {
-                    sky.with_lock(|buffer| {
-                        let (r,g,b) = get_px(buffer, x, y, w);
-                        ctx.put_px(x, y, r, g, b);
-                    });
-                }
-            }
+            // SKY
+             // if render_bottom > 0 {
+             //     for y in 0..render_bottom as usize {
+             //         sky.with_lock(|buffer| {
+             //             let (r,g,b) = get_px(buffer, x, y, w);
+             //             ctx.put_px(x, y, r, g, b);
+             //         });
+             //     }
+             // }
         }
 
         ctx.draw_seg(LineSeg::new(0.0, -3.0, 0.0, 4.0), 0xff, 0xff, 0xff);
@@ -141,6 +166,8 @@ impl<'a> RenderContext<'a> {
     }
 
     pub fn draw_wall(&mut self, x: usize, top: isize, bottom: isize, y_offset: isize, along:f32, cast_dist: f32) {
+        if bottom < 0 || top >= self.height { return; }
+
         let cut_top = if top < 0 { 0 } else { top } as usize;
         let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
 
@@ -153,6 +180,8 @@ impl<'a> RenderContext<'a> {
     }
 
     pub fn draw_floor(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
+        if bottom < 0 || top >= self.height { return; }
+
         let cut_top = if top < self.height / 2 - look { self.height / 2 - look } else { top } as usize;
         let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
 
@@ -162,6 +191,21 @@ impl<'a> RenderContext<'a> {
             let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
             let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
             self.put_px(x, y, 0x00, color, 0x00);
+        }
+    }
+
+    pub fn draw_ceiling(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
+        if bottom < 0 || top >= self.height { return; }
+
+        let cut_top = if top < 0 { 0 } else { top } as usize;
+        let cut_bottom = if bottom > self.height / 2 - look { self.height / 2 - look } else { bottom } as usize;
+
+        for y in cut_top..cut_bottom {
+            let dist_floor = VISPLANE_DIST * elevation / ((y as isize + look) as f32 - self.height as f32 / 2.0);
+            let floor_pos = pos + (hit_pos - pos).normalize() * dist_floor / Float::cos(angle);
+            let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
+            let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
+            self.put_px(x, y, color, 0x00, 0x00);
         }
     }
 }

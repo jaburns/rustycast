@@ -158,7 +158,7 @@ pub fn temp() -> World {
             Sector {
                 info: SectorInfo {
                     floor_elev: 2.0,
-                    ceiling_elev: 20.0,
+                    ceiling_elev: 30.0,
                 },
                 walls: vec![
                     Wall::new(-25.0, -25.0, -10.0, -25.0, Some((SectorIndex(0),WallIndex(4)))),
@@ -170,7 +170,7 @@ pub fn temp() -> World {
             Sector {
                 info: SectorInfo {
                     floor_elev: -2.0,
-                    ceiling_elev: 20.0,
+                    ceiling_elev: 10.0,
                 },
                 walls: vec![
                     Wall::new( 25.0,  25.0,  10.0,  25.0, Some((SectorIndex(0),WallIndex(8)))),
