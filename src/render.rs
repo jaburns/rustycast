@@ -58,6 +58,7 @@ impl<'a> Game<'a> {
 
         for x in 0..w {
             let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
+            let cos_offset = Float::cos(offset);
 
             let mut render_bottom = h as isize;
             let mut render_top = 0;
@@ -65,7 +66,7 @@ impl<'a> Game<'a> {
             for RayCastResult {along, hit_pos, in_info, out_info}
             in self.world.cast_ray(self.sector, self.pos, self.face_angle + offset) {
                 let dist = (hit_pos - self.pos).get_length();
-                let cast_dist = dist * Float::cos(offset);
+                let cast_dist = dist * cos_offset;
 
                 let floor_wall_seg_height = match out_info {
                     Some(i) => i.floor_elev - in_info.floor_elev,
@@ -107,8 +108,8 @@ impl<'a> Game<'a> {
 
                 ctx.draw_wall(x, draw_ceiling_wall_top, draw_ceiling_wall_bottom, 0, along, cast_dist);
 
-                ctx.draw_flat(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, offset, -looking_offset);
-                ctx.draw_flat(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, offset, -looking_offset);
+                ctx.draw_flat(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, cos_offset, -looking_offset);
+                ctx.draw_flat(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, cos_offset, -looking_offset);
 
                 render_top = ceiling_wall_bottom;
                 render_bottom = floor_wall_top;
@@ -179,7 +180,7 @@ impl<'a> RenderContext<'a> {
         }
     }
 
-    pub fn draw_flat(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, angle: f32, look: isize) {
+    pub fn draw_flat(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, cos_angle: f32, look: isize) {
         if bottom < 0 || top >= self.height { return; }
 
         let cut_top = if top < 0 { 0 } else { top } as usize;
@@ -187,7 +188,7 @@ impl<'a> RenderContext<'a> {
 
         for y in cut_top..cut_bottom {
             let dist_floor = VISPLANE_DIST * elevation / ((y as isize + look) as f32 - self.height as f32 / 2.0);
-            let floor_pos = pos + (hit_pos - pos).normalize() * dist_floor / Float::cos(angle);
+            let floor_pos = pos + (hit_pos - pos).normalize() * dist_floor / cos_angle;
             let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
             let color = (tex_lookup as f32 * brightness_from_dist(dist_floor)) as u8;
             self.put_px(x, y, 0x00, color, 0x00);
