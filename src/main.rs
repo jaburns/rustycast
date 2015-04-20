@@ -4,6 +4,7 @@
 #![feature(std_misc)] // Used for std::time::Duration
 #![feature(thread_sleep)]
 
+extern crate core;
 extern crate sdl2;
 extern crate sdl2_image;
 extern crate time;

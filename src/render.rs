@@ -6,7 +6,7 @@ use sdl2::surface::Surface;
 use world::{RayCastResult};
 use math::{LineSeg, Vec2, Mat3};
 use game::{Game};
-
+use core::ops::Range;
 
 const MAP_SCALE: f32 = 2.0;
 const FOV_DIV: f32 = 300.0;
@@ -88,7 +88,7 @@ impl<'a> Game<'a> {
                     0
                 };
 
-                let middle = (h as isize / 2 + looking_offset);
+                let middle = h as isize / 2 + looking_offset;
 
                 let floor_wall_bottom = middle + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
                 let floor_wall_top = floor_wall_bottom - floor_wall_seg_height_px;
@@ -107,7 +107,6 @@ impl<'a> Game<'a> {
                 let draw_ceiling_wall_bottom = if ceiling_wall_bottom > render_bottom { render_bottom } else { ceiling_wall_bottom };
 
                 ctx.draw_wall(x, draw_ceiling_wall_top, draw_ceiling_wall_bottom, 0, along, cast_dist);
-
                 ctx.draw_flat(x, draw_floor_wall_bottom, render_bottom, person_height - in_info.floor_elev, self.pos, hit_pos, cos_offset, -looking_offset);
 
                 if in_info.ceiling_elev > 22.0 {
@@ -161,13 +160,18 @@ impl<'a> RenderContext<'a> {
         }
     }
 
+    fn column_range(&mut self, top: isize, bottom: isize) ->Range<usize> {
+        if bottom < 0 || top >= self.height {
+            (0..0)
+        } else {
+            let cut_top = if top < 0 { 0 } else { top } as usize;
+            let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
+            (cut_top..cut_bottom)
+        }
+    }
+
     pub fn draw_wall(&mut self, x: usize, top: isize, bottom: isize, y_offset: isize, along:f32, cast_dist: f32) {
-        if bottom < 0 || top >= self.height { return; }
-
-        let cut_top = if top < 0 { 0 } else { top } as usize;
-        let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
-
-        for y in cut_top..cut_bottom {
+        for y in self.column_range(top, bottom) {
             let yy = ((bottom + y_offset) as usize - y) as f32 * cast_dist / 5000.0;
             let tex_lookup = (along * 25.0) as u8 ^ (512.0*yy) as u8;
             let color = ((tex_lookup as f32) * brightness_from_dist(cast_dist)) as u8;
@@ -176,12 +180,7 @@ impl<'a> RenderContext<'a> {
     }
 
     pub fn draw_flat(&mut self, x: usize, top: isize, bottom: isize, elevation: f32, pos: Vec2, hit_pos: Vec2, cos_angle: f32, look: isize) {
-        if bottom < 0 || top >= self.height { return; }
-
-        let cut_top = if top < 0 { 0 } else { top } as usize;
-        let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
-
-        for y in cut_top..cut_bottom {
+        for y in self.column_range(top, bottom) {
             let dist_floor = VISPLANE_DIST * elevation / ((y as isize + look) as f32 - self.height as f32 / 2.0);
             let floor_pos = pos + (hit_pos - pos).normalize() * dist_floor / cos_angle;
             let tex_lookup = (floor_pos.x * 10.0) as u8 ^ (floor_pos.y * 10.0) as u8;
@@ -191,12 +190,7 @@ impl<'a> RenderContext<'a> {
     }
 
     pub fn draw_sky(&mut self, sky: &mut Surface, x: usize, top: isize, bottom: isize) {
-        if bottom < 0 || top >= self.height { return; }
-
-        let cut_top = if top < 0 { 0 } else { top } as usize;
-        let cut_bottom = if bottom > self.height { self.height } else { bottom } as usize;
-
-        for y in cut_top..cut_bottom {
+        for y in self.column_range(top, bottom) {
             sky.with_lock(|buffer| {
                 let (r,g,b) = get_px(buffer, x, y, self.width as usize);
                 self.put_px(x, y, r, g, b);
@@ -204,7 +198,6 @@ impl<'a> RenderContext<'a> {
         }
     }
 }
-
 
 fn brightness_from_dist(dist: f32) -> f32 {
     (20.0 / dist).min(1.0).max(0.0)
