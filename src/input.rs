@@ -44,20 +44,14 @@ impl InputState {
     pub fn check_event(&mut self, event: &Event) {
         match *event {
             Event::KeyDown { keycode, .. }  => {
-                match map_sdl_key(keycode) {
-                    Some(key) => {
-                        self._keys_down.push(key);
-                        self._keys_down.dedup();
-                    }
-                    None => {}
+                if let Some(key) = map_sdl_key(keycode) {
+                    self._keys_down.push(key);
+                    self._keys_down.dedup();
                 }
             }
             Event::KeyUp { keycode, .. } => {
-                match map_sdl_key(keycode) {
-                    Some(key) => {
-                        self._keys_down.retain(|&k| k != key);
-                    }
-                    None => {}
+                if let Some(key) = map_sdl_key(keycode) {
+                    self._keys_down.retain(|&k| k != key);
                 }
             }
             Event::MouseMotion { xrel, yrel, .. } => {

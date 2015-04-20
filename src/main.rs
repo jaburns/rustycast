@@ -80,10 +80,7 @@ pub fn main() {
 
         for event in event_pump.poll_iter() {
             inputs.check_event(&event);
-            match event {
-                Event::Quit {..} => { break 'main; },
-                _ => {}
-            }
+            if let Event::Quit {..} = event { break 'main; }
         }
 
         if inputs.has_key(input::Key::Quit) {
