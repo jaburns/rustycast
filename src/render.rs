@@ -67,6 +67,7 @@ impl<'a> Game<'a> {
             in self.world.cast_ray(self.sector, self.pos, self.face_angle + offset) {
                 let dist = (hit_pos - self.pos).get_length();
                 let cast_dist = dist * cos_offset;
+                let middle = h as isize / 2 + looking_offset;
 
                 let floor_wall_seg_height = match out_info {
                     Some(i) => i.floor_elev - in_info.floor_elev,
@@ -88,7 +89,6 @@ impl<'a> Game<'a> {
                     0
                 };
 
-                let middle = h as isize / 2 + looking_offset;
 
                 let floor_wall_bottom = middle + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
                 let floor_wall_top = floor_wall_bottom - floor_wall_seg_height_px;
@@ -160,7 +160,7 @@ impl<'a> RenderContext<'a> {
         }
     }
 
-    fn column_range(&mut self, top: isize, bottom: isize) ->Range<usize> {
+    fn column_range(&mut self, top: isize, bottom: isize) -> Range<usize> {
         if bottom < 0 || top >= self.height {
             (0..0)
         } else {

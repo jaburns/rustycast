@@ -122,6 +122,7 @@ impl World {
             out_info: wall.portal.map(|(SectorIndex(sec), _)| self._sectors[sec].info),
         });
 
+        // TODO refactor recursion in to loop
         if let Some((next_sector, next_wall)) = wall.portal {
             self._cast_ray(next_sector, Some(next_wall), wall.seg.at(t), angle, results);
         }

@@ -46,7 +46,6 @@ pub fn main() {
         Err(err) => panic!("failed to create window: {}", err)
     };
 
-    //window.set_grab(true);
     mouse::set_relative_mouse_mode(true);
 
     let mut renderer = match Renderer::from_window(window, RenderDriverIndex::Auto, ACCELERATED) {
