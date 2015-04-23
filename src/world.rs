@@ -108,7 +108,8 @@ impl World {
             .filter(|&(i, _)| source_wall.is_none() || WallIndex(i) != source_wall.unwrap())
             .filter_map(|(_, wall)| ray.intersects(wall.seg).map(|t| (wall, t)))
             .min_by(|&(&wall, t)| {
-                ((pos - wall.seg.at(t)).get_length_sqr() * 100.0) as i32
+                let d2 = (pos - wall.seg.at(t)).get_length_sqr();
+                if d2 < 0.01 { 1000000 } else { (d2 * 100.0) as i32 }
             });
 
         if closest_wall.is_none() { return; }

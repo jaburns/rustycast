@@ -9,7 +9,6 @@ use game::{Game};
 use core::ops::Range;
 
 const MAP_SCALE: f32 = 2.0;
-const FOV_DIV: f32 = 300.0;
 const VISPLANE_DIST: f32 = 300.0;
 const PERSON_HEIGHT: f32 = 5.0;
 
@@ -56,15 +55,17 @@ impl<'a> Game<'a> {
         let w = ctx.width as usize;
         let h = ctx.height as usize;
 
+
         for x in 0..w {
-            let offset = ((x as f32) - (w as f32) / 2.0) / FOV_DIV;
-            let cos_offset = Float::cos(offset);
+            let offset_pos = (x as f32) - (w as f32) / 2.0;
+            let offset_angle = Float::atan(offset_pos / VISPLANE_DIST);
+            let cos_offset = Float::cos(offset_angle);
 
             let mut render_bottom = h as isize;
             let mut render_top = 0;
 
             for RayCastResult {along, hit_pos, in_info, out_info}
-            in self.world.cast_ray(self.sector, self.pos, self.face_angle + offset) {
+            in self.world.cast_ray(self.sector, self.pos, self.face_angle + offset_angle) {
                 let dist = (hit_pos - self.pos).get_length();
                 let cast_dist = dist * cos_offset;
                 let middle = h as isize / 2 + looking_offset;
