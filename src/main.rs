@@ -23,7 +23,7 @@ use time::PreciseTime;
 
 use sdl2::video::{Window, WindowPos, OPENGL};
 use sdl2::mouse;
-use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer};
+use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer, BlendMode};
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::event::Event;
 use sdl2_image::LoadSurface;
@@ -74,6 +74,12 @@ pub fn main() {
         t: 0.0
     };
 
+    texture.set_blend_mode(BlendMode::None);
+
+    // Wasted mode
+    //texture.set_alpha_mod(0x22);
+    //texture.set_blend_mode(BlendMode::Blend);
+
     'main : loop {
         let last_time = PreciseTime::now();
 
@@ -91,7 +97,6 @@ pub fn main() {
             game.render(&mut sky, buffer, W, H);
         }).unwrap();
 
-        drawer.clear();
         drawer.copy(&texture, None, None);
         drawer.present();
 
