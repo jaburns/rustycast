@@ -1,6 +1,5 @@
 
 use std::num::Float;
-
 use sdl2::surface::Surface;
 
 use world::{RayCastResult};
@@ -54,7 +53,6 @@ impl<'a> Game<'a> {
         let looking_offset = -self.look_angle as isize;
         let w = ctx.width as usize;
         let h = ctx.height as usize;
-
 
         for x in 0..w {
             let offset_pos = (x as f32) - (w as f32) / 2.0;
@@ -140,10 +138,10 @@ impl<'a> RenderContext<'a> {
     }
 
     pub fn clear(&mut self) {
-        for x in 0..self.width as usize {
-            for y in 0..self.height as usize {
-                self.put_px(x, y, 0x00, 0x00, 0x00);
-            }
+        use std::{mem, ptr};
+        unsafe {
+            let ptr: *mut u8 = mem::transmute(&self.pixels[0]);
+            ptr::write_bytes(ptr, 0x00, (3*self.width*self.height) as usize);
         }
     }
 
