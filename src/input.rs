@@ -1,6 +1,6 @@
 
 use sdl2::event::Event;
-use sdl2::keycode::KeyCode;
+use sdl2::keyboard::Keycode;
 
 
 #[derive(Copy,Clone,PartialEq)]
@@ -20,14 +20,14 @@ pub struct InputState {
 }
 
 
-fn map_sdl_key(key: KeyCode) -> Option<Key> {
+fn map_sdl_key(key: Keycode) -> Option<Key> {
     match key {
-        KeyCode::W      => Some(Key::Forward),
-        KeyCode::S      => Some(Key::Back),
-        KeyCode::A      => Some(Key::Left),
-        KeyCode::D      => Some(Key::Right),
-        KeyCode::Tab    => Some(Key::ShowMap),
-        KeyCode::Escape => Some(Key::Quit),
+        Keycode::W      => Some(Key::Forward),
+        Keycode::S      => Some(Key::Back),
+        Keycode::A      => Some(Key::Left),
+        Keycode::D      => Some(Key::Right),
+        Keycode::Tab    => Some(Key::ShowMap),
+        Keycode::Escape => Some(Key::Quit),
         _ => None
     }
 }
@@ -44,13 +44,13 @@ impl InputState {
     pub fn check_event(&mut self, event: &Event) {
         match *event {
             Event::KeyDown { keycode, .. }  => {
-                if let Some(key) = map_sdl_key(keycode) {
+                if let Some(key) = map_sdl_key(keycode.unwrap()) {
                     self._keys_down.push(key);
                     self._keys_down.dedup();
                 }
             }
             Event::KeyUp { keycode, .. } => {
-                if let Some(key) = map_sdl_key(keycode) {
+                if let Some(key) = map_sdl_key(keycode.unwrap()) {
                     self._keys_down.retain(|&k| k != key);
                 }
             }

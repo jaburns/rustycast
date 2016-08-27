@@ -1,5 +1,3 @@
-
-use std::num::Float;
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
 
@@ -95,7 +93,6 @@ impl Mul<Vec2> for Mat3 {
     }
 }
 
-
 impl Vec2 {
     pub fn new(x: f32, y: f32) -> Vec2 {
         Vec2 {x: x, y: y}
@@ -106,7 +103,7 @@ impl Vec2 {
     }
 
     pub fn get_length(self) -> f32 {
-        Float::sqrt(self.get_length_sqr())
+        self.get_length_sqr().sqrt()
     }
 
     pub fn dot(self, rhs: Vec2) -> f32 {
@@ -137,9 +134,9 @@ impl Mat3 {
 
     pub fn rotation(theta: f32) -> Mat3 {
         Mat3::new(
-            Float::cos(theta), -Float::sin(theta), 0.0,
-            Float::sin(theta),  Float::cos(theta), 0.0,
-                          0.0,                0.0, 1.0,
+            theta.cos(), -theta.sin(), 0.0,
+            theta.sin(),  theta.cos(), 0.0,
+                    0.0,               0.0, 1.0,
         )
     }
 

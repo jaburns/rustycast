@@ -1,8 +1,4 @@
 #![allow(dead_code)]
-#![feature(core)]
-#![feature(convert)] // Used for as_slice
-#![feature(std_misc)] // Used for std::time::Duration
-#![feature(thread_sleep)]
 
 extern crate core;
 extern crate sdl2;
@@ -15,52 +11,47 @@ mod game;
 mod input;
 mod render;
 
-use std::time::Duration;
 use std::thread;
 use std::path::Path;
 
 use time::PreciseTime;
 
-use sdl2::video::{Window, WindowPos, OPENGL};
-use sdl2::mouse;
-use sdl2::render::{RenderDriverIndex, ACCELERATED, Renderer, BlendMode};
+use sdl2::render::{BlendMode};
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :i32 = 2 * 320;
-const WINDOW_HEIGHT :i32 = 2 * 240;
+const WINDOW_WIDTH  :u32 = 2 * 320;
+const WINDOW_HEIGHT :u32 = 2 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
 
 
 pub fn main() {
-    let sdl_context = sdl2::init(sdl2::INIT_VIDEO).unwrap();
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
 
     let res_path = Path::new("/Users/jaburns/dev/rustycast/res");
 
-    let window = match Window::new(&sdl_context, "RustyCast", WindowPos::PosCentered, WindowPos::PosCentered, WINDOW_WIDTH, WINDOW_HEIGHT, OPENGL) {
-        Ok(window) => window,
-        Err(err) => panic!("failed to create window: {}", err)
-    };
+    let window = video_subsystem.window("RustyCast", WINDOW_WIDTH, WINDOW_HEIGHT)
+        .position_centered()
+        .opengl()
+        .build()
+        .unwrap();
 
-    mouse::set_relative_mouse_mode(true);
+    sdl_context.mouse().set_relative_mouse_mode(true);
 
-    let mut renderer = match Renderer::from_window(window, RenderDriverIndex::Auto, ACCELERATED) {
-        Ok(renderer) => renderer,
-        Err(err) => panic!("failed to create renderer: {}", err)
-    };
+    let mut renderer = window.renderer().build().unwrap();
 
     let mut sky = match LoadSurface::from_file(&res_path.join("sky.png")) {
         Ok(surface) => surface,
         Err(err) => panic!(format!("Failed to load png: {}", err))
     };
 
-    let mut texture = renderer.create_texture_streaming(PixelFormatEnum::RGB24, (W as i32, H as i32)).unwrap();
-    let mut drawer = renderer.drawer();
-    let mut event_pump = sdl_context.event_pump();
+    let mut texture = renderer.create_texture_streaming(PixelFormatEnum::ARGB8888, W as u32, H as u32).unwrap();
+    let mut event_pump = sdl_context.event_pump().unwrap();
 
 
     let mut inputs = input::InputState::new();
@@ -74,11 +65,11 @@ pub fn main() {
         t: 0.0
     };
 
-    texture.set_blend_mode(BlendMode::None);
+    //texture.set_blend_mode(BlendMode::None);
 
     // Wasted mode
     //texture.set_alpha_mod(0x22);
-    //texture.set_blend_mode(BlendMode::Blend);
+    texture.set_blend_mode(BlendMode::Blend);
 
     'main : loop {
         let last_time = PreciseTime::now();
@@ -97,11 +88,11 @@ pub fn main() {
             game.render(&mut sky, buffer, W, H);
         }).unwrap();
 
-        drawer.copy(&texture, None, None);
-        drawer.present();
+        renderer.copy(&texture, None, None);
+        renderer.present();
 
-        let delta_time = last_time.to(PreciseTime::now()).num_milliseconds();
-        thread::sleep(Duration::milliseconds(15 - delta_time));
+        let delta_time = last_time.to(PreciseTime::now()).num_milliseconds() as u32;
+        thread::sleep_ms(if delta_time > 15 { 0 } else { 15 - delta_time });
     }
 }
 

@@ -1,5 +1,3 @@
-
-use std::num::Float;
 use sdl2::surface::Surface;
 
 use world::{RayCastResult};
@@ -39,7 +37,7 @@ impl<'a> Game<'a> {
                   * Mat3::translation(-self.pos * MAP_SCALE)
                   * Mat3::scale(Vec2::new(MAP_SCALE, MAP_SCALE));
 
-        ctx.clear();
+        ctx.clear(0x00);
         let (player_x, player_y) = (ctx.width / 2, ctx.height / 2);
         ctx.put_px(player_x as usize, player_y as usize, 0xFF, 0x00, 0x00);
 
@@ -54,10 +52,11 @@ impl<'a> Game<'a> {
         let w = ctx.width as usize;
         let h = ctx.height as usize;
 
+        //ctx.clear(0xff);
         for x in 0..w {
             let offset_pos = (x as f32) - (w as f32) / 2.0;
-            let offset_angle = Float::atan(offset_pos / VISPLANE_DIST);
-            let cos_offset = Float::cos(offset_angle);
+            let offset_angle = (offset_pos / VISPLANE_DIST).atan();
+            let cos_offset = offset_angle.cos();
 
             let mut render_bottom = h as isize;
             let mut render_top = 0;
@@ -88,6 +87,10 @@ impl<'a> Game<'a> {
                     0
                 };
 
+                // TODO Before drawing the flats and walls for this sector, let's
+                // clip the sprite renders with what's already been drawn.
+                // SHould have a second buffer to hold sprite renders which is blt'd
+                // to the main buffer after all the raycasting is done.
 
                 let floor_wall_bottom = middle + (VISPLANE_DIST * (person_height - in_info.floor_elev) / cast_dist) as isize;
                 let floor_wall_top = floor_wall_bottom - floor_wall_seg_height_px;
@@ -126,22 +129,23 @@ impl<'a> Game<'a> {
 }
 
 
-pub fn get_px(tex: &mut [u8], x: usize, y: usize, w: usize) -> (u8,u8,u8) {
+pub fn get_px(tex: &[u8], x: usize, y: usize, w: usize) -> (u8,u8,u8) {
     (tex[3*(w*y+x)+0], tex[3*(w*y+x)+1], tex[3*(w*y+x)+2])
 }
 
 impl<'a> RenderContext<'a> {
     pub fn put_px(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8) {
-        self.pixels[3*(self.width as usize*y+x) + 0] = r;
-        self.pixels[3*(self.width as usize*y+x) + 1] = g;
-        self.pixels[3*(self.width as usize*y+x) + 2] = b;
+        self.pixels[4*(self.width as usize*y+x) + 0] = b;
+        self.pixels[4*(self.width as usize*y+x) + 1] = g;
+        self.pixels[4*(self.width as usize*y+x) + 2] = r;
+        self.pixels[4*(self.width as usize*y+x) + 3] = 0xff;
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self, shade: u8) {
         use std::{mem, ptr};
         unsafe {
             let ptr: *mut u8 = mem::transmute(&self.pixels[0]);
-            ptr::write_bytes(ptr, 0x00, (3*self.width*self.height) as usize);
+            ptr::write_bytes(ptr, shade, (4*self.width*self.height) as usize);
         }
     }
 

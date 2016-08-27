@@ -1,6 +1,3 @@
-
-use std::num::Float;
-
 use math::{LineSeg, Vec2};
 
 
@@ -38,7 +35,6 @@ pub struct RayCastResult {
     pub in_info: SectorInfo,
     pub out_info: Option<SectorInfo>,
 }
-
 
 
 pub static W_ZERO: Wall = Wall {
@@ -94,22 +90,20 @@ impl World {
     fn _cast_ray(&self, sector: SectorIndex, source_wall: Option<WallIndex>, pos: Vec2, angle: f32, results: &mut Vec<RayCastResult>) {
         let ray = LineSeg::new(
             pos.x, pos.y,
-            pos.x + 1000.0*Float::sin(angle),
-            pos.y - 1000.0*Float::cos(angle)
+            pos.x + 1000.0*angle.sin(),
+            pos.y - 1000.0*angle.cos()
         );
 
         let SectorIndex(sec_index) = sector;
 
-        //Hopefully min_by will accept a compare function so we don't have to convert to int here
-        //to get a min on some floats.
-        //    https://github.com/rust-lang/rust/issues/15311
-        //
         let closest_wall = self._sectors[sec_index].walls.iter().enumerate()
             .filter(|&(i, _)| source_wall.is_none() || WallIndex(i) != source_wall.unwrap())
             .filter_map(|(_, wall)| ray.intersects(wall.seg).map(|t| (wall, t)))
-            .min_by(|&(&wall, t)| {
+            .min_by_key(|&(&wall, t)| {
                 let d2 = (pos - wall.seg.at(t)).get_length_sqr();
                 if d2 < 0.01 { 1000000 } else { (d2 * 100.0) as i32 }
+                    // TODO get closest wall without the integer distance conversion.
+                    // Need to convert to integer here to satisfy Ord constraint, annoyingly.
             });
 
         if closest_wall.is_none() { return; }

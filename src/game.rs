@@ -1,6 +1,3 @@
-
-use std::num::Float;
-
 use world::{World, SectorIndex};
 use math::{Vec2};
 use input::{InputState, Key};
@@ -38,8 +35,8 @@ impl<'a> Game<'a> {
     }
 
     fn do_move(&mut self, para: f32, perp: f32) {
-        let sin = SPEED*Float::sin(self.face_angle);
-        let cos = SPEED*Float::cos(self.face_angle);
+        let sin = SPEED*self.face_angle.sin();
+        let cos = SPEED*self.face_angle.cos();
 
         let new_pos = self.pos + Vec2::new(
              sin*para + cos*perp,
