@@ -94,6 +94,8 @@ impl World {
             pos.y - 1000.0*angle.cos()
         );
 
+
+
         let SectorIndex(sec_index) = sector;
 
         let closest_wall = self._sectors[sec_index].walls.iter().enumerate()
@@ -151,7 +153,7 @@ pub fn temp() -> World {
             },
             Sector {
                 info: SectorInfo {
-                    floor_elev: 2.0,
+                    floor_elev: 7.0,
                     ceiling_elev: 23.0,
                 },
                 walls: vec![

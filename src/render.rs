@@ -101,7 +101,6 @@ impl<'a> Game<'a> {
 
                 ctx.draw_wall(x, draw_floor_wall_top, draw_floor_wall_bottom, floor_wall_offset_bottom, along, cast_dist);
 
-
                 let ceiling_wall_top = middle + (VISPLANE_DIST * (person_height - in_info.ceiling_elev) / cast_dist) as isize;
                 let ceiling_wall_bottom = ceiling_wall_top + ceiling_wall_seg_height_px;
 
@@ -117,8 +116,8 @@ impl<'a> Game<'a> {
                     ctx.draw_flat(x, render_top, draw_ceiling_wall_top, person_height - in_info.ceiling_elev, self.pos, hit_pos, cos_offset, -looking_offset);
                 }
 
-                render_top = ceiling_wall_bottom;
-                render_bottom = floor_wall_top;
+                if ceiling_wall_bottom > render_top { render_top = ceiling_wall_bottom; }
+                if floor_wall_top < render_bottom { render_bottom = floor_wall_top; }
             }
         }
 

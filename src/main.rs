@@ -22,8 +22,8 @@ use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :u32 = 2 * 320;
-const WINDOW_HEIGHT :u32 = 2 * 240;
+const WINDOW_WIDTH  :u32 = 3 * 320;
+const WINDOW_HEIGHT :u32 = 3 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
@@ -52,7 +52,6 @@ pub fn main() {
 
     let mut texture = renderer.create_texture_streaming(PixelFormatEnum::ARGB8888, W as u32, H as u32).unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
-
 
     let mut inputs = input::InputState::new();
     let mut game = game::Game {
