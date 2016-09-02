@@ -66,7 +66,6 @@ impl World {
         self._sectors[index].info.floor_elev
     }
 
-    // Returns (new position, new sector)
     pub fn move_object(&self, sector: SectorIndex, old_pos: Vec2, new_pos: Vec2) -> SectorIndex {
         let SectorIndex(index) = sector;
         let move_seg = LineSeg { a: old_pos, b: new_pos };

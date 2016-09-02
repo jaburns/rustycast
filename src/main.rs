@@ -3,7 +3,6 @@
 extern crate core;
 extern crate sdl2;
 extern crate sdl2_image;
-extern crate time;
 
 mod math;
 mod world;
@@ -12,9 +11,8 @@ mod input;
 mod render;
 
 use std::thread;
+use std::time::{Instant, Duration};
 use std::path::Path;
-
-use time::PreciseTime;
 
 use sdl2::render::{BlendMode};
 use sdl2::pixels::PixelFormatEnum;
@@ -22,11 +20,13 @@ use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :u32 = 3 * 320;
-const WINDOW_HEIGHT :u32 = 3 * 240;
+const WINDOW_WIDTH  :u32 = 1 * 320;
+const WINDOW_HEIGHT :u32 = 1 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
+
+const FRAME_TIME_MS :u64 = 17;
 
 
 pub fn main() {
@@ -45,10 +45,7 @@ pub fn main() {
 
     let mut renderer = window.renderer().build().unwrap();
 
-    let mut sky = match LoadSurface::from_file(&res_path.join("sky.png")) {
-        Ok(surface) => surface,
-        Err(err) => panic!(format!("Failed to load png: {}", err))
-    };
+    let mut sky = LoadSurface::from_file(&res_path.join("sky.png")).unwrap();
 
     let mut texture = renderer.create_texture_streaming(PixelFormatEnum::ARGB8888, W as u32, H as u32).unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -64,14 +61,14 @@ pub fn main() {
         t: 0.0
     };
 
-    //texture.set_blend_mode(BlendMode::None);
+    texture.set_blend_mode(BlendMode::None);
 
     // Wasted mode
-    //texture.set_alpha_mod(0x22);
-    texture.set_blend_mode(BlendMode::Blend);
+    // texture.set_alpha_mod(0x22);
+    // texture.set_blend_mode(BlendMode::Blend);
 
     'main : loop {
-        let last_time = PreciseTime::now();
+        let last_time = Instant::now();
 
         for event in event_pump.poll_iter() {
             inputs.check_event(&event);
@@ -90,8 +87,11 @@ pub fn main() {
         renderer.copy(&texture, None, None);
         renderer.present();
 
-        let delta_time = last_time.to(PreciseTime::now()).num_milliseconds() as u32;
-        thread::sleep_ms(if delta_time > 15 { 0 } else { 15 - delta_time });
+        let delta_time = ((Instant::now() - last_time).subsec_nanos() / 1000000) as u64;
+
+        if delta_time < FRAME_TIME_MS {
+            thread::sleep(Duration::from_millis(FRAME_TIME_MS - delta_time));
+        }
     }
 }
 
