@@ -20,8 +20,8 @@ use sdl2::event::Event;
 use sdl2_image::LoadSurface;
 
 
-const WINDOW_WIDTH  :u32 = 1 * 320;
-const WINDOW_HEIGHT :u32 = 1 * 240;
+const WINDOW_WIDTH  :u32 = 3 * 320;
+const WINDOW_HEIGHT :u32 = 3 * 240;
 
 const W :usize = 320;
 const H :usize = 240;
